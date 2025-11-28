@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Plus, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { db } from "@/lib/db";
 import { apps } from "@/lib/schema";
 import { desc } from "drizzle-orm";
+import { CreateAppDialog } from "@/components/create-app-dialog";
 
 export default async function DashboardPage() {
   const allApps = await db.select().from(apps).orderBy(desc(apps.updatedAt));
@@ -15,9 +15,7 @@ export default async function DashboardPage() {
             <h2 className="text-2xl font-bold tracking-tight">Applications</h2>
             <p className="text-muted-foreground">Manage your documentation sites.</p>
         </div>
-        <Button>
-            <Plus className="mr-2 h-4 w-4" /> Create App
-        </Button>
+        <CreateAppDialog />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -40,7 +38,7 @@ export default async function DashboardPage() {
                 </div>
                 <h3 className="text-lg font-semibold">No apps created</h3>
                 <p className="text-sm text-muted-foreground">Get started by creating your first documentation app.</p>
-                <Button className="mt-4">Create App</Button>
+                <CreateAppDialog />
             </div>
         )}
       </div>
