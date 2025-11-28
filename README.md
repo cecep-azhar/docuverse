@@ -1,22 +1,32 @@
 # Docuverse
 
-Open Source Documentation Platform built with Next.js 15, Drizzle ORM, and Turso.
+**Open-source documentation platform inspired by GitBook & Mintlify** 
 
-## Features
+Beautiful, flexible documentation platform built with Next.js 15, featuring multi-app support, versioning, internationalization, and a powerful admin dashboard.
 
-- **Multi-App**: Manage multiple documentation sites from one admin panel.
-- **Multi-Version**: Support for versioning (v1, v2, etc.).
-- **Multi-Language**: Internationalization support.
-- **Admin Panel**: Full management interface with WYSIWYG editor.
-- **Public Docs**: Beautiful, responsive documentation viewer.
+## 🚀 Features
 
-## Tech Stack
+- ✅ **Multi-App Documentation** - Host multiple product documentations in one platform
+- ✅ **Version Control** - Support multiple versions per app (v1.0, v2.0, etc.)
+- ✅ **Internationalization** - Multi-language support (en, id, etc.)
+- ✅ **Nested Pages** - Folder structure with unlimited nesting
+- ✅ **Markdown/MDX Support** - Rich content with next-mdx-remote
+- ✅ **Dark/Light Mode** - Beautiful themes with next-themes
+- ✅ **Admin Dashboard** - Complete CRUD for apps, pages, and settings
+- ✅ **Brand Customization** - Configure company branding from admin panel
+- ✅ **Responsive Design** - Mobile-first UI with Tailwind CSS
+- ✅ **SQLite/Turso Database** - Auto-switching based on environment
 
-- **Framework**: Next.js 15 (App Router)
-- **Database**: SQLite (Local) / Turso (Production)
-- **ORM**: Drizzle ORM
-- **Styling**: Tailwind CSS + shadcn/ui
-- **Auth**: Simple Admin Auth (Email/Password)
+## 🛠️ Tech Stack
+
+- **Framework:** Next.js 15 (App Router, React Server Components, Turbopack)
+- **Runtime:** React 19
+- **Database:** Drizzle ORM + SQLite (local) / Turso (production)
+- **Styling:** Tailwind CSS + shadcn/ui
+- **Authentication:** bcryptjs
+- **Editor:** Tiptap (WYSIWYG) + next-mdx-remote (Markdown rendering)
+- **Icons:** lucide-react
+- **Theme:** next-themes
 
 ## Setup
 

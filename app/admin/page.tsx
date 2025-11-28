@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { verifyPassword, getUser } from "@/lib/auth";
 
-export default function AdminLoginPage() {
+export default async function AdminLoginPage() {
   async function login(formData: FormData) {
     "use server";
     
@@ -15,13 +15,15 @@ export default function AdminLoginPage() {
     // Hardcoded for initial setup if DB is empty, or check DB
     if (email === "admin@docuverse.com" && password === "admin") {
         // Set cookie
-        cookies().set("admin_session", "true", { httpOnly: true });
+        const cookieStore = await cookies();
+        cookieStore.set("admin_session", "true", { httpOnly: true });
         redirect("/admin/dashboard");
     }
 
     const user = await getUser(email);
     if (user && await verifyPassword(password, user.passwordHash)) {
-        cookies().set("admin_session", "true", { httpOnly: true });
+        const cookieStore = await cookies();
+        cookieStore.set("admin_session", "true", { httpOnly: true });
         redirect("/admin/dashboard");
     }
     

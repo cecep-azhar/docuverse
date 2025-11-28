@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import {
   AlertDialog,
@@ -15,21 +14,22 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 
-interface DeletePageButtonProps {
-  pageId: string;
-  pageTitle?: string;
+interface DeleteAppButtonProps {
+  appId: string;
+  appName: string;
 }
 
-export function DeletePageButton({ pageId, pageTitle = "this page" }: DeletePageButtonProps) {
-  const [loading, setLoading] = useState(false);
-  const [open, setOpen] = useState(false);
+export function DeleteAppButton({ appId, appName }: DeleteAppButtonProps) {
   const router = useRouter();
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [open, setOpen] = useState(false);
 
   async function handleDelete() {
-    setLoading(true);
+    setIsDeleting(true);
     try {
-      const res = await fetch(`/api/pages?id=${pageId}`, {
+      const res = await fetch(`/api/apps?id=${appId}`, {
         method: "DELETE",
       });
 
@@ -39,13 +39,13 @@ export function DeletePageButton({ pageId, pageTitle = "this page" }: DeletePage
       } else {
         const error = await res.json();
         console.error("Delete failed:", error);
-        alert(`Failed to delete page: ${error.error || "Unknown error"}`);
+        alert(`Failed to delete app: ${error.error || "Unknown error"}`);
       }
     } catch (error) {
-      console.error("Error deleting page:", error);
-      alert(`Error deleting page: ${error}`);
+      console.error("Error deleting app:", error);
+      alert(`Error deleting app: ${error}`);
     } finally {
-      setLoading(false);
+      setIsDeleting(false);
     }
   }
 
@@ -57,6 +57,7 @@ export function DeletePageButton({ pageId, pageTitle = "this page" }: DeletePage
           size="icon"
           className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
           onClick={(e: React.MouseEvent) => {
+            e.preventDefault();
             e.stopPropagation();
           }}
         >
@@ -65,25 +66,26 @@ export function DeletePageButton({ pageId, pageTitle = "this page" }: DeletePage
       </AlertDialogTrigger>
       <AlertDialogContent onClick={(e: React.MouseEvent) => e.stopPropagation()}>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete Page</AlertDialogTitle>
+          <AlertDialogTitle>Delete Application</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to delete <strong>{pageTitle}</strong>?
+            Are you sure you want to delete <strong>{appName}</strong>?
             <br />
             <br />
-            This action cannot be undone.
+            This will permanently delete the app and all its versions, languages,
+            and pages. This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={(e: React.MouseEvent) => {
               e.preventDefault();
               handleDelete();
             }}
-            disabled={loading}
+            disabled={isDeleting}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            {loading ? "Deleting..." : "Delete"}
+            {isDeleting ? "Deleting..." : "Delete"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -5,9 +5,10 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ThemeProvider } from "@/components/theme-provider";
 
-export async function generateMetadata({ params }: { params: { appSlug: string } }) {
+export async function generateMetadata({ params }: { params: Promise<{ appSlug: string }> }) {
+  const { appSlug } = await params;
   const app = await db.query.apps.findFirst({
-    where: eq(apps.slug, params.appSlug),
+    where: eq(apps.slug, appSlug),
   });
   if (!app) return { title: "Not Found" };
   return {
@@ -24,10 +25,11 @@ export default async function PublicAppLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: { appSlug: string };
+  params: Promise<{ appSlug: string }>;
 }) {
+  const { appSlug } = await params;
   const app = await db.query.apps.findFirst({
-    where: eq(apps.slug, params.appSlug),
+    where: eq(apps.slug, appSlug),
   });
 
   if (!app) {

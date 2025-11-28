@@ -14,11 +14,14 @@ export default async function AppDashboardPage({
   params,
   searchParams 
 }: { 
-  params: { appId: string };
-  searchParams: { version?: string; language?: string };
+  params: Promise<{ appId: string }>;
+  searchParams: Promise<{ version?: string; language?: string }>;
 }) {
+  const { appId } = await params;
+  const searchParamsResolved = await searchParams;
+  
   const app = await db.query.apps.findFirst({
-    where: eq(apps.id, params.appId),
+    where: eq(apps.id, appId),
     with: {
         versions: true,
         languages: true,
@@ -34,11 +37,11 @@ export default async function AppDashboardPage({
   let defaultLanguage = app.languages.find(l => l.isDefault) || app.languages[0];
 
   // Override with query params if provided
-  const selectedVersion = searchParams.version 
-    ? app.versions.find(v => v.id === searchParams.version) || defaultVersion
+  const selectedVersion = searchParamsResolved.version 
+    ? app.versions.find(v => v.id === searchParamsResolved.version) || defaultVersion
     : defaultVersion;
-  const selectedLanguage = searchParams.language
-    ? app.languages.find(l => l.id === searchParams.language) || defaultLanguage
+  const selectedLanguage = searchParamsResolved.language
+    ? app.languages.find(l => l.id === searchParamsResolved.language) || defaultLanguage
     : defaultLanguage;
 
   if (!selectedVersion || !selectedLanguage) {
@@ -91,7 +94,7 @@ export default async function AppDashboardPage({
                           </div>
                           <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                               <EditPageDialog page={page} />
-                              <DeletePageButton pageId={page.id} />
+                              <DeletePageButton pageId={page.id} pageTitle={page.title} />
                           </div>
                       </div>
                   ))}

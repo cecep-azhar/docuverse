@@ -99,3 +99,12 @@ export const users = sqliteTable('users', {
   passwordHash: text('password_hash').notNull(),
   role: text('role').notNull().default('admin'),
 });
+
+export const settings = sqliteTable('settings', {
+  id: text('id').primaryKey(),
+  brandName: text('brand_name').notNull().default('Docuverse'),
+  brandLogo: text('brand_logo'),
+  brandDescription: text('brand_description'),
+  primaryColor: text('primary_color').default('#000000'),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(new Date()),
+});

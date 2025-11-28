@@ -4,12 +4,13 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { LayoutDashboard, Plus, Settings, LogOut } from "lucide-react";
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = cookies().get("admin_session");
+  const cookieStore = await cookies();
+  const session = cookieStore.get("admin_session");
   if (!session) {
     redirect("/admin");
   }
@@ -29,6 +30,13 @@ export default function DashboardLayout({
             href="/admin/dashboard"
             className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
           >
+            <LayoutDashboard className="h-5 w-5" />
+            <span className="sr-only">Dashboard</span>
+          </Link>
+          <Link
+            href="/admin/dashboard/settings"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+          >
             <Settings className="h-5 w-5" />
             <span className="sr-only">Settings</span>
           </Link>
@@ -36,7 +44,8 @@ export default function DashboardLayout({
         <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
             <form action={async () => {
                 "use server";
-                cookies().delete("admin_session");
+                const cookieStore = await cookies();
+                cookieStore.delete("admin_session");
                 redirect("/admin");
             }}>
                 <Button variant="ghost" size="icon" className="rounded-lg">
