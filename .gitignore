@@ -1,8 +1,6 @@
 node_modules
 .next
-out
-sqlite.db
 .env
-.env.*
-!.env.example
-migrations
+.env.local
+local.db
+local.db-journal

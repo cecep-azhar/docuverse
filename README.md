@@ -1,56 +1,86 @@
-# Docuverse (Early Scaffold)
+# Docuverse
 
-This is the initial scaffold for **Docuverse**, an open-source flexible documentation platform (inspired by GitBook / Mintlify).
+Open Source Documentation Platform built with Next.js 15, Drizzle ORM, and Turso.
 
-## Stack
-- Next.js 15 (App Router, Turbopack)
-- TypeScript strict
-- Drizzle ORM + drizzle-kit
-- SQLite locally (better-sqlite3) / Turso (libSQL) in production
-- Tailwind CSS + (shadcn/ui planned)
+## Features
 
-## Environment Variables
-Copy `.env.example` to `.env.local` and adjust if needed:
+- **Multi-App**: Manage multiple documentation sites from one admin panel.
+- **Multi-Version**: Support for versioning (v1, v2, etc.).
+- **Multi-Language**: Internationalization support.
+- **Admin Panel**: Full management interface with WYSIWYG editor.
+- **Public Docs**: Beautiful, responsive documentation viewer.
 
-```
-NODE_ENV=development
-ADMIN_EMAIL=admin@example.com
-ADMIN_PASSWORD=changeme123
-# TURSO_DATABASE_URL=
-# TURSO_AUTH_TOKEN=
-```
+## Tech Stack
 
-If `TURSO_DATABASE_URL` is set, Turso will be used; otherwise local `sqlite.db` file.
+- **Framework**: Next.js 15 (App Router)
+- **Database**: SQLite (Local) / Turso (Production)
+- **ORM**: Drizzle ORM
+- **Styling**: Tailwind CSS + shadcn/ui
+- **Auth**: Simple Admin Auth (Email/Password)
 
-## Drizzle Migrations
-Generate / push migrations:
+## Setup
 
-```bash
-npm run db:generate
-npm run db:push
-```
-
-## Development
+### 1. Install Dependencies
 
 ```bash
 npm install
+```
+
+### 2. Environment Setup
+
+Copy `.env.example` to `.env.local`:
+
+```bash
+cp .env.example .env.local
+```
+
+For local development, `DATABASE_URL=file:local.db` is sufficient.
+
+For Turso:
+1. Create a database on Turso.
+2. Get the Database URL and Auth Token.
+3. Update `.env.local`.
+
+### 3. Database Migration
+
+Push the schema to the database:
+
+```bash
+npm run db:push
+```
+
+### 4. Seed Data
+
+Populate the database with initial data (Admin user + Demo App):
+
+```bash
+npm run seed
+```
+
+**Default Admin Credentials:**
+- Email: `admin@docuverse.com`
+- Password: `admin`
+
+### 5. Run Development Server
+
+```bash
 npm run dev
 ```
-Visit `http://localhost:3000/admin` for the admin placeholder and `http://localhost:3000/docuverse` (after seeding) for public docs.
 
-## Turso Setup (Outline)
-1. Install Turso CLI: `curl -sSfL https://get.turso.tech/install.sh | bash` (Linux/macOS) or via Scoop on Windows.
-2. Login: `turso auth login`.
-3. Create database: `turso db create docuverse`.
-4. Get the URL: `turso db show docuverse` -> use `libsql://...` URL.
-5. Create token: `turso db tokens create docuverse`.
-6. Put values into `.env.local` as `TURSO_DATABASE_URL` & `TURSO_AUTH_TOKEN`.
-7. Run migrations: `npm run db:push`.
+Visit:
+- Admin: [http://localhost:3000/admin](http://localhost:3000/admin)
+- Docs: [http://localhost:3000/docuverse](http://localhost:3000/docuverse)
 
-## Next Steps
-- Implement seed script
-- Build admin CRUD (tree, editor)
-- Public docs rendering + MDX/Markdown pipeline
-- Search (FTS5)
+## Project Structure
 
-This scaffold will evolve into full feature set per spec.
+- `app/(public)`: Public documentation routes.
+- `app/admin`: Admin panel routes.
+- `lib/db.ts`: Database connection.
+- `lib/schema.ts`: Database schema.
+- `components`: Reusable UI components.
+
+## Deployment
+
+1. Build the project: `npm run build`
+2. Start the server: `npm start`
+3. Or deploy to Vercel (ensure Environment Variables are set).

@@ -1,19 +1,13 @@
-import 'dotenv/config';
 import { defineConfig } from 'drizzle-kit';
-
-const useTurso = !!process.env.TURSO_DATABASE_URL;
+import * as dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 
 export default defineConfig({
   schema: './lib/schema.ts',
   out: './migrations',
   dialect: 'sqlite',
-  driver: useTurso ? 'turso' : 'better-sqlite',
-  dbCredentials: useTurso
-    ? {
-        url: process.env.TURSO_DATABASE_URL!,
-        authToken: process.env.TURSO_AUTH_TOKEN,
-      }
-    : {
-        url: 'sqlite.db',
-      },
+  dbCredentials: {
+    url: process.env.DATABASE_URL || 'file:local.db',
+    authToken: process.env.TURSO_AUTH_TOKEN,
+  },
 });
