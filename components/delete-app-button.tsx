@@ -28,42 +28,63 @@ export function DeleteAppButton({ appId, appName }: DeleteAppButtonProps) {
 
   async function handleDelete() {
     setIsDeleting(true);
+    console.log("[DELETE APP] Starting delete for appId:", appId);
+    
     try {
-      const res = await fetch(`/api/apps?id=${appId}`, {
+      const url = `/api/apps?id=${appId}`;
+      console.log("[DELETE APP] Fetching:", url);
+      
+      const res = await fetch(url, {
         method: "DELETE",
       });
 
-      if (res.ok) {
+      console.log("[DELETE APP] Response status:", res.status);
+
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ error: "Unknown error" }));
+        console.error("[DELETE APP] Delete failed:", error);
+        alert(`Failed to delete app: ${error.error || "Unknown error"}`);
+        return;
+      }
+
+      const data = await res.json();
+      console.log("[DELETE APP] Response data:", data);
+      
+      if (data.success) {
+        console.log("[DELETE APP] Success! Redirecting to dashboard...");
         setOpen(false);
+        router.push("/admin/dashboard");
         router.refresh();
       } else {
-        const error = await res.json();
-        console.error("Delete failed:", error);
-        alert(`Failed to delete app: ${error.error || "Unknown error"}`);
+        console.error("[DELETE APP] Success flag false:", data);
+        alert(`Delete failed: ${data.error || "Unknown error"}`);
       }
     } catch (error) {
-      console.error("Error deleting app:", error);
-      alert(`Error deleting app: ${error}`);
+      console.error("[DELETE APP] Error deleting app:", error);
+      alert(`Error deleting app: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setIsDeleting(false);
     }
   }
 
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-          onClick={(e: React.MouseEvent) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </AlertDialogTrigger>
+    <div onClick={(e: React.MouseEvent) => {
+      console.log("[DELETE APP] Wrapper clicked, stopping propagation");
+      e.stopPropagation();
+    }}>
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogTrigger asChild>
+          <button
+            aria-label="Delete application"
+            className="inline-flex items-center justify-center h-8 w-8 rounded-md text-destructive hover:text-destructive hover:bg-destructive/10 transition-colors"
+            onClick={(e: React.MouseEvent) => {
+              console.log("[DELETE APP] Button clicked, opening dialog");
+              e.stopPropagation();
+            }}
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </AlertDialogTrigger>
       <AlertDialogContent onClick={(e: React.MouseEvent) => e.stopPropagation()}>
         <AlertDialogHeader>
           <AlertDialogTitle>Delete Application</AlertDialogTitle>
@@ -90,5 +111,6 @@ export function DeleteAppButton({ appId, appName }: DeleteAppButtonProps) {
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+    </div>
   );
 }

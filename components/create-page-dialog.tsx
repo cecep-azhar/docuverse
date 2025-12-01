@@ -14,9 +14,17 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Plus } from "lucide-react";
 import { slugify } from "@/lib/utils";
+import dynamic from "next/dynamic";
+
+const Editor = dynamic(
+  () => import("@/app/admin/dashboard/apps/[appId]/components/editor"),
+  { 
+    ssr: false,
+    loading: () => <div className="border rounded-md p-4 min-h-[400px] flex items-center justify-center text-muted-foreground">Loading editor...</div>
+  }
+);
 
 interface CreatePageDialogProps {
   appId: string;
@@ -27,6 +35,7 @@ interface CreatePageDialogProps {
 export function CreatePageDialog({ appId, versionId, languageId }: CreatePageDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [content, setContent] = useState("");
   const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -35,7 +44,6 @@ export function CreatePageDialog({ appId, versionId, languageId }: CreatePageDia
 
     const formData = new FormData(e.currentTarget);
     const title = formData.get("title") as string;
-    const content = formData.get("content") as string;
     const slug = slugify(title);
 
     try {
@@ -55,10 +63,15 @@ export function CreatePageDialog({ appId, versionId, languageId }: CreatePageDia
 
       if (res.ok) {
         setOpen(false);
+        setContent("");
         router.refresh();
+      } else {
+        const error = await res.json();
+        alert(`Error: ${error.error}`);
       }
     } catch (error) {
       console.error(error);
+      alert("Failed to create page");
     } finally {
       setLoading(false);
     }
@@ -71,12 +84,12 @@ export function CreatePageDialog({ appId, versionId, languageId }: CreatePageDia
           <Plus className="mr-2 h-4 w-4" /> New Page
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Create New Page</DialogTitle>
             <DialogDescription>
-              Add a new page to your documentation.
+              Add a new page to your documentation with rich text formatting, images, links, and YouTube videos.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -90,13 +103,8 @@ export function CreatePageDialog({ appId, versionId, languageId }: CreatePageDia
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="content">Content (Markdown)</Label>
-              <Textarea
-                id="content"
-                name="content"
-                placeholder="# Getting Started&#10;&#10;Welcome to the documentation..."
-                className="min-h-[200px] font-mono text-sm"
-              />
+              <Label htmlFor="content">Content</Label>
+              <Editor content={content} onChange={setContent} />
             </div>
           </div>
           <DialogFooter>

@@ -28,22 +28,39 @@ export function DeletePageButton({ pageId, pageTitle = "this page" }: DeletePage
 
   async function handleDelete() {
     setLoading(true);
+    console.log("[DELETE PAGE] Starting delete for pageId:", pageId);
+    
     try {
-      const res = await fetch(`/api/pages?id=${pageId}`, {
+      const url = `/api/pages?id=${pageId}`;
+      console.log("[DELETE PAGE] Fetching:", url);
+      
+      const res = await fetch(url, {
         method: "DELETE",
       });
 
-      if (res.ok) {
+      console.log("[DELETE PAGE] Response status:", res.status);
+
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ error: "Unknown error" }));
+        console.error("[DELETE PAGE] Delete failed:", error);
+        alert(`Failed to delete page: ${error.error || "Unknown error"}`);
+        return;
+      }
+
+      const data = await res.json();
+      console.log("[DELETE PAGE] Response data:", data);
+      
+      if (data.success) {
+        console.log("[DELETE PAGE] Success! Refreshing...");
         setOpen(false);
         router.refresh();
       } else {
-        const error = await res.json();
-        console.error("Delete failed:", error);
-        alert(`Failed to delete page: ${error.error || "Unknown error"}`);
+        console.error("[DELETE PAGE] Success flag false:", data);
+        alert(`Delete failed: ${data.error || "Unknown error"}`);
       }
     } catch (error) {
-      console.error("Error deleting page:", error);
-      alert(`Error deleting page: ${error}`);
+      console.error("[DELETE PAGE] Error deleting page:", error);
+      alert(`Error deleting page: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setLoading(false);
     }

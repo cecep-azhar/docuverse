@@ -23,16 +23,8 @@ export default async function HomePage() {
       <div className="fixed inset-0 pointer-events-none bg-gradient-to-b from-transparent via-background/40 to-background/80" />
 
       <div className="relative z-10">
-        <header className="sticky top-0 z-20 border-b bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <header className="sticky top-0 z-20">
           <div className="container flex h-16 items-center justify-between">
-            <Link href="/" className="flex items-center gap-3">
-              {brand.brandLogo ? (
-                <img src={brand.brandLogo} alt={brand.brandName} className="h-7 w-7 rounded" />
-              ) : (
-                <BookOpen className="h-6 w-6 text-primary" />
-              )}
-              <span className="text-lg font-semibold tracking-tight hidden md:inline">{brand.brandName}</span>
-            </Link>
             <nav className="flex items-center gap-2">
               <ThemeToggle />
               {/* <Button asChild size="sm">
@@ -52,7 +44,7 @@ export default async function HomePage() {
             <div className="mx-auto max-w-3xl text-center">
               <div className="mb-8 flex justify-center">
                 {brand.brandLogo ? (
-                  <div className="h-24 w-24 overflow-hidden rounded-xl border bg-card shadow-sm">
+                  <div className="h-24 w-24 overflow-hidden rounded-xl border bg-white shadow-sm">
                     <img
                       src={brand.brandLogo}
                       alt={brand.brandName}
@@ -60,7 +52,7 @@ export default async function HomePage() {
                     />
                   </div>
                 ) : (
-                  <div className="flex h-24 w-24 items-center justify-center rounded-xl border bg-card shadow-sm">
+                  <div className="flex h-24 w-24 items-center justify-center rounded-xl border bg-white shadow-sm">
                     <BookOpen className="h-12 w-12 text-primary" />
                   </div>
                 )}

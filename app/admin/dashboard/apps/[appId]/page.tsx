@@ -4,11 +4,11 @@ import { eq, and } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CreatePageDialog } from "@/components/create-page-dialog";
-import { EditPageDialog } from "@/components/edit-page-dialog";
-import { DeletePageButton } from "@/components/delete-page-button";
 import { VersionSwitcher } from "@/components/version-switcher";
 import { LanguageSwitcher } from "@/components/language-switcher";
-import { FileText, Folder } from "lucide-react";
+import { ExternalLink, Settings } from "lucide-react";
+import Link from "next/link";
+import { PageList } from "./components/page-list";
 
 export default async function AppDashboardPage({ 
   params,
@@ -68,7 +68,18 @@ export default async function AppDashboardPage({
             </div>
         </div>
         <div className="flex gap-2">
-            <Button variant="outline">Settings</Button>
+            <Link href={`/${app.slug}`} target="_blank">
+              <Button variant="outline" className="gap-2">
+                <ExternalLink className="h-4 w-4" />
+                Preview
+              </Button>
+            </Link>
+            <Link href={`/admin/dashboard/apps/${app.id}/settings`}>
+              <Button variant="outline" className="gap-2">
+                <Settings className="h-4 w-4" />
+                Settings
+              </Button>
+            </Link>
             <CreatePageDialog appId={app.id} versionId={selectedVersion.id} languageId={selectedLanguage.id} />
         </div>
       </div>
@@ -78,32 +89,7 @@ export default async function AppDashboardPage({
               <div className="p-4 border-b">
                   <h3 className="font-semibold">Pages</h3>
               </div>
-              <div className="divide-y">
-                  {appPages.map(page => (
-                      <div key={page.id} className="p-4 hover:bg-accent/50 transition-colors flex items-center justify-between group">
-                          <div className="flex items-center gap-3">
-                              {page.isFolder ? (
-                                  <Folder className="h-4 w-4 text-muted-foreground" />
-                              ) : (
-                                  <FileText className="h-4 w-4 text-muted-foreground" />
-                              )}
-                              <div>
-                                  <div className="font-medium">{page.title}</div>
-                                  <div className="text-xs text-muted-foreground">/{page.slug}</div>
-                              </div>
-                          </div>
-                          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <EditPageDialog page={page} />
-                              <DeletePageButton pageId={page.id} pageTitle={page.title} />
-                          </div>
-                      </div>
-                  ))}
-                  {appPages.length === 0 && (
-                      <div className="p-8 text-center text-sm text-muted-foreground">
-                          No pages yet. Click &quot;New Page&quot; to get started.
-                      </div>
-                  )}
-              </div>
+              <PageList pages={appPages} />
           </div>
       </div>
     </div>

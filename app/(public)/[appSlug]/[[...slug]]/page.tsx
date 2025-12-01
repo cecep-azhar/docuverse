@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Menu, Search, ChevronRight, ChevronDown, Home, BookOpen } from "lucide-react";
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { ThemeToggle } from "@/components/theme-toggle";
+import { SearchButton } from "@/components/search-button";
 
 // Helper to recursively render sidebar
 function SidebarItem({ page, currentSlug, depth = 0 }: { page: any, currentSlug: string, depth?: number }) {
@@ -196,14 +197,12 @@ export default async function PublicPage({ params }: { params: Promise<{ appSlug
             </div>
             <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
                 <div className="w-full flex-1 md:w-auto md:flex-none">
-                    <Button variant="outline" className="relative h-8 w-full justify-start rounded-[0.5rem] bg-background text-sm font-normal text-muted-foreground shadow-none sm:pr-12 md:w-40 lg:w-64">
-                        <Search className="mr-2 h-4 w-4" />
-                        <span className="hidden lg:inline-flex">Search documentation...</span>
-                        <span className="inline-flex lg:hidden">Search...</span>
-                        <kbd className="pointer-events-none absolute right-[0.3rem] top-[0.3rem] hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
-                            <span className="text-xs">⌘</span>K
-                        </kbd>
-                    </Button>
+                    <SearchButton
+                        appId={app.id}
+                        appSlug={appSlug}
+                        versionSlug={version.slug}
+                        languageCode={language.code}
+                    />
                 </div>
                 <ThemeToggle />
             </div>
@@ -237,7 +236,14 @@ export default async function PublicPage({ params }: { params: Promise<{ appSlug
                 </div>
                 <div className="pb-12 pt-8">
                     <div className="prose prose-gray dark:prose-invert max-w-none">
-                        <MDXRemote source={currentPage.content || ""} />
+                        {currentPage.content ? (
+                            <div 
+                                className="[&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_iframe]:w-full [&_iframe]:aspect-video [&_iframe]:rounded-lg [&_.youtube-video]:w-full [&_.youtube-video]:aspect-video [&_.youtube-video]:rounded-lg [&_a]:text-blue-500 [&_a]:underline [&_a]:hover:text-blue-700"
+                                dangerouslySetInnerHTML={{ __html: currentPage.content }}
+                            />
+                        ) : (
+                            <p className="text-muted-foreground">No content available.</p>
+                        )}
                     </div>
                 </div>
             </div>

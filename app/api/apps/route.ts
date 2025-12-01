@@ -10,7 +10,8 @@ export async function POST(req: NextRequest) {
 
     const appId = uuidv4();
     const versionId = uuidv4();
-    const languageId = uuidv4();
+    const languageIdEn = uuidv4();
+    const languageIdId = uuidv4();
 
     // Create app
     await db.insert(apps).values({
@@ -22,22 +23,31 @@ export async function POST(req: NextRequest) {
       updatedAt: new Date(),
     });
 
-    // Create default version
+    // Create default version (1.0.0)
     await db.insert(versions).values({
       id: versionId,
       appId,
-      slug: "v1",
-      name: "1.0",
+      slug: "v1.0.0",
+      name: "1.0.0",
       isDefault: true,
     });
 
-    // Create default language
+    // Create Indonesian language (default)
     await db.insert(languages).values({
-      id: languageId,
+      id: languageIdId,
+      appId,
+      code: "id",
+      name: "Bahasa Indonesia",
+      isDefault: true,
+    });
+
+    // Create English language
+    await db.insert(languages).values({
+      id: languageIdEn,
       appId,
       code: "en",
       name: "English",
-      isDefault: true,
+      isDefault: false,
     });
 
     return NextResponse.json({ success: true, appId });
@@ -67,7 +77,10 @@ export async function DELETE(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
 
+    console.log("[API DELETE APP] Received request for ID:", id);
+
     if (!id) {
+      console.error("[API DELETE APP] No ID provided");
       return NextResponse.json(
         { error: "App ID is required" },
         { status: 400 }
@@ -75,11 +88,13 @@ export async function DELETE(req: NextRequest) {
     }
 
     // Delete app (cascade will delete related versions, languages, and pages)
-    await db.delete(apps).where(eq(apps.id, id));
+    console.log("[API DELETE APP] Deleting app with ID:", id);
+    const result = await db.delete(apps).where(eq(apps.id, id));
+    console.log("[API DELETE APP] Delete result:", result);
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Delete app error:", error);
+    console.error("[API DELETE APP] Error:", error);
     return NextResponse.json(
       { error: "Failed to delete app" },
       { status: 500 }

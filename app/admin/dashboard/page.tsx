@@ -23,17 +23,21 @@ export default async function DashboardPage() {
         {allApps.map((app) => (
             <div key={app.id} className="group relative flex flex-col gap-2 rounded-lg border p-6 hover:bg-accent transition-colors">
                 <div className="flex items-center justify-between">
-                    <Link href={`/admin/dashboard/apps/${app.id}`} className="flex-1">
-                        <h3 className="font-semibold hover:text-primary transition-colors">{app.name}</h3>
-                    </Link>
-                    <div className="flex items-center gap-1">
+                    <h3 className="font-semibold hover:text-primary transition-colors flex-1">{app.name}</h3>
+                    <div className="flex items-center gap-1 relative z-10">
                         <DeleteAppButton appId={app.id} appName={app.name} />
-                        <Link href={`/admin/dashboard/apps/${app.id}`}>
+                        <Link 
+                            href={`/admin/dashboard/apps/${app.id}`}
+                            className="p-1"
+                        >
                             <ArrowRight className="h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
                         </Link>
                     </div>
                 </div>
-                <Link href={`/admin/dashboard/apps/${app.id}`} className="flex-1">
+                <Link 
+                    href={`/admin/dashboard/apps/${app.id}`} 
+                    className="flex-1 cursor-pointer"
+                >
                     <p className="text-sm text-muted-foreground line-clamp-2">{app.description || "No description"}</p>
                     <div className="mt-auto pt-4 text-xs text-muted-foreground">
                         /{app.slug}

@@ -64,15 +64,20 @@ export async function DELETE(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
 
+    console.log("[API DELETE PAGE] Received request for ID:", id);
+
     if (!id) {
+      console.error("[API DELETE PAGE] No ID provided");
       return NextResponse.json({ error: "Page ID required" }, { status: 400 });
     }
 
-    await db.delete(pages).where(eq(pages.id, id));
+    console.log("[API DELETE PAGE] Deleting page with ID:", id);
+    const result = await db.delete(pages).where(eq(pages.id, id));
+    console.log("[API DELETE PAGE] Delete result:", result);
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error(error);
+    console.error("[API DELETE PAGE] Error:", error);
     return NextResponse.json(
       { error: "Failed to delete page" },
       { status: 500 }
