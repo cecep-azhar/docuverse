@@ -4,6 +4,8 @@ import Link from "next/link";
 import { BookOpen, ArrowRight, Github } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { NetworkBackground } from "@/components/network-background";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export default async function HomePage() {
   const allApps = await db.select().from(apps);
@@ -17,153 +19,163 @@ export default async function HomePage() {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      {/* Network Background */}
       <NetworkBackground />
-      
-      {/* Gradient Overlay */}
-      <div className="fixed inset-0 bg-gradient-to-br from-purple-500/10 via-background to-blue-500/10 dark:from-purple-700/20 dark:via-background dark:to-blue-700/20 pointer-events-none" />
-      <div className="fixed inset-0 bg-gradient-radial from-transparent via-background/50 to-background pointer-events-none" />
-      
-      {/* Content */}
+      <div className="fixed inset-0 pointer-events-none bg-gradient-to-b from-background via-background/90 to-background" />
+
       <div className="relative z-10">
-      {/* Header */}
-      <header className="border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-2">
-            {brand.brandLogo ? (
-              <img src={brand.brandLogo} alt={brand.brandName} className="h-8 w-8" />
-            ) : (
-              <BookOpen className="h-6 w-6" />
-            )}
-            <span className="text-xl font-bold">{brand.brandName}</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <ThemeToggle />
-            <Link 
-              href="/admin" 
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Admin
+        <header className="sticky top-0 z-20 border-b bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="container flex h-16 items-center justify-between">
+            <Link href="/" className="flex items-center gap-3">
+              {brand.brandLogo ? (
+                <img src={brand.brandLogo} alt={brand.brandName} className="h-7 w-7 rounded" />
+              ) : (
+                <BookOpen className="h-6 w-6 text-primary" />
+              )}
+              <span className="text-lg font-semibold tracking-tight">{brand.brandName}</span>
             </Link>
-          </div>
-        </div>
-      </header>
-
-      {/* Hero Section with Centered Branding */}
-      <section className="container py-24 md:py-32 lg:py-48">
-        <div className="mx-auto max-w-4xl text-center">
-          {/* Centered Brand Logo */}
-          <div className="mb-8 flex justify-center">
-            {brand.brandLogo ? (
-              <div className="h-32 w-32 rounded-2xl overflow-hidden bg-card/50 backdrop-blur-sm border-2 border-primary/20 shadow-2xl shadow-primary/20 flex items-center justify-center">
-                <img
-                  src={brand.brandLogo}
-                  alt={brand.brandName}
-                  className="h-full w-full object-contain p-4"
-                />
-              </div>
-            ) : (
-              <div className="flex h-32 w-32 items-center justify-center rounded-2xl bg-primary/10 backdrop-blur-sm border-2 border-primary/20 shadow-2xl shadow-primary/20">
-                <BookOpen className="h-16 w-16 text-primary" />
-              </div>
-            )}
-          </div>
-          
-          <h1 className="text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl lg:text-8xl bg-clip-text text-transparent bg-gradient-to-r from-foreground via-primary to-foreground">
-            {brand.brandName}
-          </h1>
-          <p className="mt-6 text-xl text-muted-foreground sm:text-2xl max-w-2xl mx-auto">
-            {brand.brandDescription}
-          </p>
-        </div>
-      </section>
-
-      {/* Documentation Grid */}
-      <section className="container pb-24 md:pb-32">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-12 text-center">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Explore Documentation
-            </h2>
-            <p className="mt-3 text-muted-foreground">
-              Choose a product to view its documentation
-            </p>
-          </div>
-
-          {allApps.length === 0 ? (
-            <div className="rounded-lg border border-dashed p-12 text-center">
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-                <BookOpen className="h-10 w-10 text-muted-foreground" />
-              </div>
-              <h3 className="mt-4 text-lg font-semibold">No documentation yet</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Documentation will appear here once created.
-              </p>
-            </div>
-          ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {allApps.map((app) => (
-                <Link
-                  key={app.id}
-                  href={`/${app.slug}`}
-                  className="group relative overflow-hidden rounded-lg border bg-card/50 backdrop-blur-sm p-6 transition-all hover:shadow-xl hover:shadow-primary/10 hover:border-primary/50 hover:scale-105"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      {app.logoUrl ? (
-                        <img 
-                          src={app.logoUrl} 
-                          alt={app.name}
-                          className="h-10 w-10 rounded-lg object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                          <BookOpen className="h-5 w-5 text-primary" />
-                        </div>
-                      )}
-                      <div>
-                        <h3 className="font-semibold group-hover:text-primary transition-colors">
-                          {app.name}
-                        </h3>
-                      </div>
-                    </div>
-                    <ArrowRight className="h-5 w-5 text-muted-foreground opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-1" />
-                  </div>
-                  <p className="mt-4 text-sm text-muted-foreground line-clamp-2">
-                    {app.description || "No description available"}
-                  </p>
-                  <div className="mt-4 flex items-center gap-2">
-                    <div className="rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
-                      Documentation
-                    </div>
-                  </div>
+            <nav className="flex items-center gap-2">
+              <ThemeToggle />
+              <Button asChild size="sm">
+                <Link href="/admin">Open Admin</Link>
+              </Button>
+              <Button asChild size="sm" variant="ghost">
+                <Link href="https://github.com" target="_blank" aria-label="GitHub">
+                  <Github className="h-4 w-4" />
                 </Link>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+              </Button>
+            </nav>
+          </div>
+        </header>
 
-      {/* Footer */}
-      <footer className="border-t bg-background/80 backdrop-blur-md">
-        <div className="container py-8">
-          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <BookOpen className="h-4 w-4" />
-              <span>Powered by {brand.brandName}</span>
+        <main>
+          <section className="container py-20 md:py-28">
+            <div className="mx-auto max-w-3xl text-center">
+              <div className="mb-8 flex justify-center">
+                {brand.brandLogo ? (
+                  <div className="h-24 w-24 overflow-hidden rounded-xl border bg-card shadow-sm">
+                    <img
+                      src={brand.brandLogo}
+                      alt={brand.brandName}
+                      className="h-full w-full object-contain p-3"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex h-24 w-24 items-center justify-center rounded-xl border bg-card shadow-sm">
+                    <BookOpen className="h-12 w-12 text-primary" />
+                  </div>
+                )}
+              </div>
+
+              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+                {brand.brandName}
+              </h1>
+              <p className="mt-4 text-base text-muted-foreground sm:text-lg">
+                {brand.brandDescription}
+              </p>
+
+              <div className="mt-8 flex items-center justify-center gap-3">
+                <Button asChild size="lg">
+                  <a href="#docs" aria-label="Browse documentation">Browse Docs</a>
+                </Button>
+                <Button asChild size="lg" variant="outline">
+                  <Link href="/admin">Create or Manage Docs</Link>
+                </Button>
+              </div>
             </div>
-            <div className="flex items-center gap-4">
-              <Link 
-                href="https://github.com" 
-                target="_blank"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <Github className="h-5 w-5" />
-              </Link>
+          </section>
+
+          <section id="docs" className="container pb-20 md:pb-28">
+            <div className="mx-auto max-w-6xl">
+              <div className="mb-8 flex items-end justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Explore Documentation</h2>
+                  <p className="mt-2 text-sm text-muted-foreground">Select a product to view its docs.</p>
+                </div>
+                {allApps.length > 0 && (
+                  <Button asChild variant="ghost" size="sm">
+                    <Link href="/admin">Manage</Link>
+                  </Button>
+                )}
+              </div>
+
+              {allApps.length === 0 ? (
+                <Card className="p-10 text-center">
+                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-muted">
+                    <BookOpen className="h-7 w-7 text-muted-foreground" />
+                  </div>
+                  <h3 className="mt-4 text-base font-semibold">No documentation yet</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Get started by creating your first app and pages in Admin.
+                  </p>
+                  <div className="mt-6 flex items-center justify-center">
+                    <Button asChild>
+                      <Link href="/admin">Open Admin</Link>
+                    </Button>
+                  </div>
+                </Card>
+              ) : (
+                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  {allApps.map((app) => (
+                    <Link
+                      key={app.id}
+                      href={`/${app.slug}`}
+                      aria-label={`Open ${app.name} documentation`}
+                    >
+                      <Card className="group h-full cursor-pointer p-6 transition-shadow hover:shadow-md">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-3">
+                            {app.logoUrl ? (
+                              <img
+                                src={app.logoUrl}
+                                alt={app.name}
+                                className="h-10 w-10 rounded-md border object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-10 w-10 items-center justify-center rounded-md border bg-card">
+                                <BookOpen className="h-5 w-5 text-primary" />
+                              </div>
+                            )}
+                            <div>
+                              <h3 className="font-medium transition-colors group-hover:text-primary">
+                                {app.name}
+                              </h3>
+                              <div className="mt-1 text-xs text-muted-foreground">Documentation</div>
+                            </div>
+                          </div>
+                          <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 transition-all group-hover:translate-x-1 group-hover:opacity-100" />
+                        </div>
+                        <p className="mt-4 line-clamp-2 text-sm text-muted-foreground">
+                          {app.description || "No description available"}
+                        </p>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+        </main>
+
+        <footer className="border-t bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="container py-6">
+            <div className="flex flex-col items-center justify-between gap-4 text-sm text-muted-foreground md:flex-row">
+              <div className="flex items-center gap-2">
+                <BookOpen className="h-4 w-4" />
+                <span>Powered by {brand.brandName}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Link
+                  href="https://github.com"
+                  target="_blank"
+                  className="transition-colors hover:text-foreground"
+                  aria-label="GitHub"
+                >
+                  <Github className="h-4 w-4" />
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
-      </footer>
+        </footer>
       </div>
     </div>
   );
