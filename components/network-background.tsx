@@ -7,6 +7,8 @@ interface Particle {
   y: number;
   vx: number;
   vy: number;
+  r: number;
+  layer: number;
 }
 
 export function NetworkBackground() {
@@ -21,91 +23,138 @@ export function NetworkBackground() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Set canvas size
+    // Respect reduced motion
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // Set canvas size with device pixel ratio for crisp rendering
     const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const { innerWidth: w, innerHeight: h } = window;
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
-    // Initialize particles
-    const particleCount = 80;
-    const particles: Particle[] = [];
-    
-    for (let i = 0; i < particleCount; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-      });
-    }
-    particlesRef.current = particles;
-
-    // Mouse move handler
-    const handleMouseMove = (e: MouseEvent) => {
-      mouseRef.current = { x: e.clientX, y: e.clientY };
+    // Initialize particles (multi-layer for subtle parallax)
+    const computeCount = () => {
+      const area = window.innerWidth * window.innerHeight;
+      // Fewer particles overall to look more spaced
+      const base = Math.round((area / (1440 * 900)) * 60);
+      return Math.max(36, Math.min(base, 100));
     };
-    window.addEventListener("mousemove", handleMouseMove);
+
+    const layers = [
+      { speed: 0.15, size: [1.2, 2.0], link: 90 },
+      { speed: 0.25, size: [1.5, 2.6], link: 115 },
+      { speed: 0.4, size: [1.8, 3.2], link: 135 },
+    ];
+
+    const seedParticles = () => {
+      const count = computeCount();
+      const seeded: Particle[] = [];
+      for (let i = 0; i < count; i++) {
+        const layer = i % layers.length;
+        const [minR, maxR] = layers[layer].size;
+        seeded.push({
+          x: Math.random() * window.innerWidth,
+          y: Math.random() * window.innerHeight,
+          vx: (Math.random() - 0.5) * layers[layer].speed,
+          vy: (Math.random() - 0.5) * layers[layer].speed,
+          r: minR + Math.random() * (maxR - minR),
+          layer,
+        });
+      }
+      particlesRef.current = seeded;
+    };
+    seedParticles();
+
+    // Mouse interactions disabled as requested (no follow / no lines)
+    const handleMouseMove = (_e: MouseEvent) => {
+      // Intentionally left blank
+    };
+    // Do not attach the listener to avoid any overhead
+
+    // Theme detection helper
+    const getThemeColors = () => {
+      // Light blue (Tailwind sky-400: rgb(56, 189, 248))
+      // Use ALPHA placeholder to inject dynamic opacity where needed
+      return {
+        particle: "rgba(56, 189, 248, 0.9)",
+        lineBase: "rgba(56, 189, 248, ALPHA)",
+        accent: "rgba(56, 189, 248, ALPHA)",
+      } as const;
+    };
 
     // Animation loop
     let animationId: number;
     const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const { innerWidth: w, innerHeight: h } = window;
+      ctx.clearRect(0, 0, w, h);
 
-      // Get theme color
-      const isDark = document.documentElement.classList.contains("dark");
-      const particleColor = isDark ? "rgba(255, 255, 255, 0.6)" : "rgba(0, 0, 0, 0.4)";
-      const lineColor = isDark ? "rgba(255, 255, 255, 0.15)" : "rgba(0, 0, 0, 0.1)";
-      const mouseLineColor = isDark ? "rgba(147, 51, 234, 0.4)" : "rgba(147, 51, 234, 0.3)";
+      const colors = getThemeColors();
+      const particles = particlesRef.current;
 
-      particles.forEach((particle) => {
+      // Global styles
+      ctx.lineWidth = 1.2;
+
+      // Update and draw particles
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+
+        // No mouse pull — keep motion independent from cursor
+
         // Update position
-        particle.x += particle.vx;
-        particle.y += particle.vy;
+        p.x += p.vx;
+        p.y += p.vy;
 
-        // Bounce off edges
-        if (particle.x < 0 || particle.x > canvas.width) particle.vx *= -1;
-        if (particle.y < 0 || particle.y > canvas.height) particle.vy *= -1;
+        // Mild friction to prevent runaway
+        p.vx *= 0.995;
+        p.vy *= 0.995;
 
-        // Draw particle
+        // Wrap around edges for continuous flow
+        if (p.x < -20) p.x = w + 20;
+        if (p.x > w + 20) p.x = -20;
+        if (p.y < -20) p.y = h + 20;
+        if (p.y > h + 20) p.y = -20;
+
+        // Draw particle with brighter soft glow
         ctx.beginPath();
-        ctx.arc(particle.x, particle.y, 2, 0, Math.PI * 2);
-        ctx.fillStyle = particleColor;
+        ctx.fillStyle = colors.particle;
+        ctx.shadowBlur = 12 - p.layer * 2; // stronger glow
+        ctx.shadowColor = colors.particle;
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
         ctx.fill();
+      }
 
-        // Draw lines to nearby particles
-        particles.forEach((otherParticle) => {
-          const dx = particle.x - otherParticle.x;
-          const dy = particle.y - otherParticle.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
+      // Draw connections efficiently (avoid double work)
+      for (let i = 0; i < particles.length; i++) {
+        const p1 = particles[i];
+        const linkDistance = layers[p1.layer].link;
+        for (let j = i + 1; j < particles.length; j++) {
+          const p2 = particles[j];
+          // Only connect to particles within ~layer-based range
+          const maxDist = Math.min(linkDistance, layers[p2.layer].link);
+          const dx = p1.x - p2.x;
+          const dy = p1.y - p2.y;
+          const d = Math.hypot(dx, dy);
+          if (d > maxDist) continue;
 
-          if (distance < 150) {
-            ctx.beginPath();
-            ctx.moveTo(particle.x, particle.y);
-            ctx.lineTo(otherParticle.x, otherParticle.y);
-            ctx.strokeStyle = lineColor;
-            ctx.lineWidth = 1;
-            ctx.stroke();
-          }
-        });
-
-        // Draw lines to mouse
-        const mouseDx = particle.x - mouseRef.current.x;
-        const mouseDy = particle.y - mouseRef.current.y;
-        const mouseDistance = Math.sqrt(mouseDx * mouseDx + mouseDy * mouseDy);
-
-        if (mouseDistance < 200) {
+          const t = 1 - d / maxDist; // 0..1
+          const alpha = 0.25 * t; // brighter lines
           ctx.beginPath();
-          ctx.moveTo(particle.x, particle.y);
-          ctx.lineTo(mouseRef.current.x, mouseRef.current.y);
-          const opacity = (1 - mouseDistance / 200) * 0.5;
-          ctx.strokeStyle = mouseLineColor.replace("0.4", opacity.toString()).replace("0.3", opacity.toString());
-          ctx.lineWidth = 2;
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.strokeStyle = colors.lineBase.replace("ALPHA", alpha.toFixed(3));
+          ctx.shadowBlur = 0;
           ctx.stroke();
         }
-      });
+      }
+
+      // No accent lines to mouse
 
       animationId = requestAnimationFrame(animate);
     };
@@ -113,7 +162,7 @@ export function NetworkBackground() {
 
     return () => {
       window.removeEventListener("resize", resizeCanvas);
-      window.removeEventListener("mousemove", handleMouseMove);
+      // No mouse listener attached
       cancelAnimationFrame(animationId);
     };
   }, []);
@@ -121,8 +170,7 @@ export function NetworkBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none -z-10"
-      style={{ opacity: 0.5 }}
+      className="fixed inset-0 -z-10 pointer-events-none opacity-60"
     />
   );
 }

@@ -20,7 +20,7 @@ export default async function HomePage() {
   return (
     <div className="relative min-h-screen overflow-hidden">
       <NetworkBackground />
-      <div className="fixed inset-0 pointer-events-none bg-gradient-to-b from-background via-background/90 to-background" />
+      <div className="fixed inset-0 pointer-events-none bg-gradient-to-b from-transparent via-background/40 to-background/80" />
 
       <div className="relative z-10">
         <header className="sticky top-0 z-20 border-b bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -31,18 +31,18 @@ export default async function HomePage() {
               ) : (
                 <BookOpen className="h-6 w-6 text-primary" />
               )}
-              <span className="text-lg font-semibold tracking-tight">{brand.brandName}</span>
+              <span className="text-lg font-semibold tracking-tight hidden md:inline">{brand.brandName}</span>
             </Link>
             <nav className="flex items-center gap-2">
               <ThemeToggle />
-              <Button asChild size="sm">
+              {/* <Button asChild size="sm">
                 <Link href="/admin">Open Admin</Link>
-              </Button>
-              <Button asChild size="sm" variant="ghost">
+              </Button> */}
+              {/* <Button asChild size="sm" variant="ghost">
                 <Link href="https://github.com" target="_blank" aria-label="GitHub">
                   <Github className="h-4 w-4" />
                 </Link>
-              </Button>
+              </Button> */}
             </nav>
           </div>
         </header>
