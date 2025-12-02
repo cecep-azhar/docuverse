@@ -5,6 +5,9 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ThemeProvider } from "@/components/theme-provider";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function generateMetadata({ params }: { params: Promise<{ appSlug: string }> }) {
   const { appSlug } = await params;
   const app = await db.query.apps.findFirst({

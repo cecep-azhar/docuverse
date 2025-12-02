@@ -7,15 +7,31 @@ import { NetworkBackground } from "@/components/network-background";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function HomePage() {
-  const allApps = await db.select().from(apps);
-  
-  let brandSettings = await db.select().from(settings).limit(1);
-  const brand = brandSettings[0] || {
+  let allApps: typeof apps.$inferSelect[] = [];
+  let brand = {
     brandName: "Docuverse",
     brandDescription: "Open source documentation platform. Beautiful, fast, and easy to use.",
-    brandLogo: null,
+    brandLogo: null as string | null,
   };
+
+  try {
+    allApps = await db.select().from(apps);
+    const brandSettings = await db.select().from(settings).limit(1);
+    if (brandSettings[0]) {
+      brand = {
+        brandName: brandSettings[0].brandName,
+        brandDescription: brandSettings[0].brandDescription || brand.brandDescription,
+        brandLogo: brandSettings[0].brandLogo,
+      };
+    }
+  } catch (error) {
+    console.error("Database error:", error);
+    // Return default values if database is not ready
+  }
 
   return (
     <div className="relative min-h-screen overflow-hidden">

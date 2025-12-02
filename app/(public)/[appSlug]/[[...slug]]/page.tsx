@@ -10,6 +10,9 @@ import { MDXRemote } from 'next-mdx-remote/rsc';
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SearchButton } from "@/components/search-button";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // Helper to recursively render sidebar
 function SidebarItem({ page, currentSlug, depth = 0 }: { page: any, currentSlug: string, depth?: number }) {
     const isActive = page.slug === currentSlug;

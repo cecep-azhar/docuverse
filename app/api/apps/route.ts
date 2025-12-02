@@ -65,8 +65,9 @@ export async function GET() {
     const allApps = await db.select().from(apps);
     return NextResponse.json(allApps);
   } catch (error) {
+    console.error("Failed to fetch apps:", error);
     return NextResponse.json(
-      { error: "Failed to fetch apps" },
+      { error: "Failed to fetch apps", details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }

@@ -6,8 +6,17 @@ import { desc } from "drizzle-orm";
 import { CreateAppDialog } from "@/components/create-app-dialog";
 import { DeleteAppButton } from "@/components/delete-app-button";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function DashboardPage() {
-  const allApps = await db.select().from(apps).orderBy(desc(apps.updatedAt));
+  let allApps: typeof apps.$inferSelect[] = [];
+  
+  try {
+    allApps = await db.select().from(apps).orderBy(desc(apps.updatedAt));
+  } catch (error) {
+    console.error("Database error:", error);
+  }
 
   return (
     <div className="flex flex-col gap-8">

@@ -10,6 +10,9 @@ import { ExternalLink, Settings } from "lucide-react";
 import Link from "next/link";
 import { PageList } from "./components/page-list";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function AppDashboardPage({ 
   params,
   searchParams 
