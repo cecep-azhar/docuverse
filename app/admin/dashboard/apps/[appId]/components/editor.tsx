@@ -139,12 +139,10 @@ export default function Editor({
   const handleAddYouTube = () => {
     const videoId = extractYoutubeId(youtubeUrl);
     if (videoId) {
-      // Use Tiptap's YouTube extension
-      editor?.commands.setYoutubeVideo({
-        src: youtubeUrl,
-        width: 640,
-        height: 360,
-      });
+      // Insert responsive YouTube iframe as HTML
+      const iframeHtml = `<div class="youtube-embed" style="position: relative; width: 100%; padding-bottom: 56.25%; margin: 1rem 0;"><iframe style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 0.5rem;" src="https://www.youtube.com/embed/${videoId}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+      
+      editor?.commands.insertContent(iframeHtml);
 
       setYoutubeUrl("");
       setShowYouTubeDialog(false);
