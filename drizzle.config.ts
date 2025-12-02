@@ -5,7 +5,7 @@ dotenv.config({ path: '.env.local' });
 export default defineConfig({
   schema: './lib/schema.ts',
   out: './migrations',
-  dialect: 'sqlite',
+  dialect: 'turso',
   dbCredentials: {
     url: process.env.DATABASE_URL || 'file:local.db',
     authToken: process.env.TURSO_AUTH_TOKEN,
