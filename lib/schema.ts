@@ -1,5 +1,5 @@
 import { sqliteTable, text, integer, uniqueIndex } from 'drizzle-orm/sqlite-core';
-import { relations } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 
 export const apps = sqliteTable('apps', {
   id: text('id').primaryKey(),
@@ -96,8 +96,10 @@ export const pagesRelations = relations(pages, ({ one, many }) => ({
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(),
   email: text('email').notNull().unique(),
+  name: text('name'),
   passwordHash: text('password_hash').notNull(),
-  role: text('role').notNull().default('admin'),
+  role: text('role', { enum: ['super_admin', 'admin'] }).notNull().default('admin'),
+  createdAt: text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const settings = sqliteTable('settings', {

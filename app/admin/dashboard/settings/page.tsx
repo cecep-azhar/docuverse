@@ -1,112 +1,38 @@
-"use client";
+import { getCurrentUser, canManageSettings } from "@/lib/permissions";
+import { redirect } from "next/navigation";
+import { Card, CardContent } from "@/components/ui/card";
+import SettingsPageClient from "./settings-client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
-export default function SettingsPage() {
-  const [loading, setLoading] = useState(false);
-  const [brandName, setBrandName] = useState("");
-  const [brandDescription, setBrandDescription] = useState("");
-  const [brandLogo, setBrandLogo] = useState("");
-  const router = useRouter();
-
-  useEffect(() => {
-    fetch("/api/settings")
-      .then((res) => res.json())
-      .then((data) => {
-        setBrandName(data.brandName || "");
-        setBrandDescription(data.brandDescription || "");
-        setBrandLogo(data.brandLogo || "");
-      });
-  }, []);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const res = await fetch("/api/settings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          brandName,
-          brandDescription,
-          brandLogo,
-        }),
-      });
-
-      if (res.ok) {
-        alert("Settings saved successfully!");
-        router.refresh();
-      }
-    } catch (error) {
-      console.error(error);
-      alert("Failed to save settings");
-    } finally {
-      setLoading(false);
-    }
+export default async function SettingsPage() {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) {
+    redirect("/admin");
   }
 
-  return (
-    <div className="flex flex-col gap-8">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
-        <p className="text-muted-foreground">Manage your branding and site settings.</p>
-      </div>
+  const canManage = canManageSettings(currentUser.role);
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Brand Settings</CardTitle>
-          <CardDescription>
-            Customize your landing page branding
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="brandName">Brand Name</Label>
-              <Input
-                id="brandName"
-                value={brandName}
-                onChange={(e) => setBrandName(e.target.value)}
-                placeholder="Docuverse"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="brandDescription">Brand Description</Label>
-              <Textarea
-                id="brandDescription"
-                value={brandDescription}
-                onChange={(e) => setBrandDescription(e.target.value)}
-                placeholder="Open source documentation platform..."
-                rows={3}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="brandLogo">Brand Logo URL</Label>
-              <Input
-                id="brandLogo"
-                value={brandLogo}
-                onChange={(e) => setBrandLogo(e.target.value)}
-                placeholder="https://example.com/logo.png"
-              />
-              {brandLogo && (
-                <div className="mt-2">
-                  <img src={brandLogo} alt="Logo preview" className="h-12 w-12 rounded object-cover" />
-                </div>
-              )}
-            </div>
-            <Button type="submit" disabled={loading}>
-              {loading ? "Saving..." : "Save Settings"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
-  );
+  if (!canManage) {
+    return (
+      <div className="flex-1 space-y-6">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
+          <p className="text-muted-foreground mt-1">
+            System settings dan konfigurasi
+          </p>
+        </div>
+        <Card>
+          <CardContent className="py-16 text-center">
+            <p className="text-muted-foreground">
+              Hanya Super Admin yang dapat mengakses halaman settings
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return <SettingsPageClient />;
 }

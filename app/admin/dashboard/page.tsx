@@ -1,92 +1,188 @@
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { db } from "@/lib/db";
-import { apps } from "@/lib/schema";
-import { desc } from "drizzle-orm";
+import { apps, pages, users } from "@/lib/schema";
+import { StatsCard } from "@/components/admin/stats-card";
+import { 
+  FileText, 
+  FolderKanban, 
+  Users as UsersIcon, 
+  Eye,
+  TrendingUp,
+  Activity
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { sql } from "drizzle-orm";
 import { CreateAppDialog } from "@/components/create-app-dialog";
 import { DeleteAppButton } from "@/components/delete-app-button";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export default async function DashboardPage() {
-  let allApps: typeof apps.$inferSelect[] = [];
-  
+async function getStats() {
   try {
-    allApps = await db.select().from(apps).orderBy(desc(apps.updatedAt));
+    const [appsCount, pagesCount, usersCount] = await Promise.all([
+      db.select({ count: sql<number>`count(*)` }).from(apps),
+      db.select({ count: sql<number>`count(*)` }).from(pages),
+      db.select({ count: sql<number>`count(*)` }).from(users),
+    ]);
+
+    const allApps = await db.select().from(apps).limit(5);
+
+    return {
+      totalApps: Number(appsCount[0]?.count || 0),
+      totalPages: Number(pagesCount[0]?.count || 0),
+      totalUsers: Number(usersCount[0]?.count || 0),
+      recentApps: allApps,
+    };
   } catch (error) {
-    console.error("Database error:", error);
+    console.error("Error fetching stats:", error);
+    return {
+      totalApps: 0,
+      totalPages: 0,
+      totalUsers: 0,
+      recentApps: [],
+    };
   }
+}
+
+export default async function DashboardPage() {
+  const stats = await getStats();
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex-1 space-y-6 p-8 pt-6">
       <div className="flex items-center justify-between">
         <div>
-            <h2 className="text-2xl font-bold tracking-tight">Applications</h2>
-            <p className="text-muted-foreground">Manage your documentation sites.</p>
+          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+          <p className="text-muted-foreground mt-1">
+            Ringkasan aktivitas dan statistik
+          </p>
         </div>
         <CreateAppDialog />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {allApps.map((app) => (
-            <div key={app.id} className="group relative flex flex-col gap-2 rounded-lg border p-6 hover:bg-accent transition-colors">
-                <div className="flex items-center justify-between">
-                    <h3 className="font-semibold hover:text-primary transition-colors flex-1">{app.name}</h3>
-                    <div className="flex items-center gap-1 relative z-10">
-                        <DeleteAppButton appId={app.id} appName={app.name} />
-                        <Link 
-                            href={`/admin/dashboard/apps/${app.id}`}
-                            className="p-1"
-                        >
-                            <ArrowRight className="h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
-                        </Link>
-                    </div>
-                </div>
-                <Link 
-                    href={`/admin/dashboard/apps/${app.id}`} 
-                    className="flex-1 cursor-pointer"
-                >
-                    <p className="text-sm text-muted-foreground line-clamp-2">{app.description || "No description"}</p>
-                    <div className="mt-auto pt-4 text-xs text-muted-foreground">
-                        /{app.slug}
-                    </div>
-                </Link>
-            </div>
-        ))}
-        {allApps.length === 0 && (
-            <div className="col-span-full flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed p-8 text-center animate-in fade-in-50">
-                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-                    <LayoutDashboard className="h-10 w-10 text-muted-foreground" />
-                </div>
-                <h3 className="text-lg font-semibold">No apps created</h3>
-                <p className="text-sm text-muted-foreground">Get started by creating your first documentation app.</p>
+      {/* Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatsCard
+          title="Total Aplikasi"
+          value={stats.totalApps}
+          description="Jumlah aplikasi terdaftar"
+          icon={FolderKanban}
+        />
+        <StatsCard
+          title="Total Halaman"
+          value={stats.totalPages}
+          description="Jumlah halaman dokumentasi"
+          icon={FileText}
+        />
+        <StatsCard
+          title="Total Users"
+          value={stats.totalUsers}
+          description="Jumlah users terdaftar"
+          icon={UsersIcon}
+        />
+        <StatsCard
+          title="Total Views"
+          value="0"
+          description="Total kunjungan halaman"
+          icon={Eye}
+        />
+      </div>
+
+      {/* Recent Activity */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <Card className="col-span-4">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              Aplikasi Terbaru
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {stats.recentApps.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <FolderKanban className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p>Belum ada aplikasi</p>
                 <CreateAppDialog />
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {stats.recentApps.map((app) => (
+                  <div
+                    key={app.id}
+                    className="flex items-center gap-4 p-3 rounded-lg hover:bg-accent transition-colors"
+                  >
+                    {app.logoUrl ? (
+                      <img
+                        src={app.logoUrl}
+                        alt={app.name}
+                        className="h-10 w-10 rounded object-cover"
+                      />
+                    ) : (
+                      <div className="h-10 w-10 rounded bg-primary/10 flex items-center justify-center">
+                        <FolderKanban className="h-5 w-5 text-primary" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{app.name}</p>
+                      <p className="text-sm text-muted-foreground truncate">
+                        /{app.slug}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <DeleteAppButton appId={app.id} appName={app.name} />
+                      <Button variant="ghost" size="sm" asChild>
+                        <Link href={`/admin/dashboard/apps/${app.id}`}>
+                          Kelola
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="col-span-3">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              Statistik Bulanan
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Halaman Dibuat</span>
+                <span className="font-semibold">{stats.totalPages}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Aplikasi Aktif</span>
+                <span className="font-semibold">{stats.totalApps}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Total Views</span>
+                <span className="font-semibold">0</span>
+              </div>
+              <div className="pt-4 border-t">
+                <p className="text-xs text-muted-foreground">
+                  Diperbarui: {new Date().toLocaleDateString('id-ID', { 
+                    day: 'numeric',
+                    month: 'long', 
+                    year: 'numeric' 
+                  })}
+                </p>
+              </div>
             </div>
-        )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Footer */}
+      <div className="text-center text-sm text-muted-foreground pt-8">
+        Development by Software Engineering RND Gerlink {new Date().getFullYear()}
       </div>
     </div>
   );
 }
-
-function LayoutDashboard(props: any) {
-    return (
-      <svg
-        {...props}
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <rect width="7" height="9" x="3" y="3" rx="1" />
-        <rect width="7" height="5" x="14" y="3" rx="1" />
-        <rect width="7" height="9" x="14" y="12" rx="1" />
-        <rect width="7" height="5" x="3" y="16" rx="1" />
-      </svg>
-    )
-  }
