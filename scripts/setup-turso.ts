@@ -18,6 +18,7 @@ async function init() {
   try {
     // Drop tables if exist (careful in production!)
     console.log("Dropping existing tables...");
+    await client.execute(`DROP TABLE IF EXISTS page_views;`).catch(() => {});
     await client.execute(`DROP TABLE IF EXISTS pages;`).catch(() => {});
     await client.execute(`DROP TABLE IF EXISTS languages;`).catch(() => {});
     await client.execute(`DROP TABLE IF EXISTS versions;`).catch(() => {});
@@ -109,8 +110,20 @@ async function init() {
         brand_name TEXT NOT NULL DEFAULT 'Docuverse',
         brand_logo TEXT,
         brand_description TEXT,
+        documentation_name TEXT NOT NULL DEFAULT 'Documentation',
         primary_color TEXT DEFAULT '#000000',
         updated_at INTEGER NOT NULL
+      );
+    `);
+
+    // Create page_views table
+    console.log("Creating page_views table...");
+    await client.execute(`
+      CREATE TABLE page_views (
+        id TEXT PRIMARY KEY,
+        page_id TEXT NOT NULL,
+        viewed_at INTEGER NOT NULL,
+        FOREIGN KEY (page_id) REFERENCES pages(id) ON DELETE CASCADE
       );
     `);
 
@@ -131,11 +144,12 @@ async function init() {
     // Seed default settings
     console.log("Seeding default settings...");
     await client.execute({
-      sql: `INSERT INTO settings (id, brand_name, brand_description, updated_at) VALUES (?, ?, ?, ?)`,
+      sql: `INSERT INTO settings (id, brand_name, brand_description, documentation_name, updated_at) VALUES (?, ?, ?, ?, ?)`,
       args: [
         "default",
         "Docuverse",
         "Beautiful open-source documentation platform",
+        "Documentation",
         Math.floor(Date.now() / 1000),
       ],
     });
