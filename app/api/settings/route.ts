@@ -11,6 +11,7 @@ export async function GET() {
       brandName: "Docuverse",
       brandDescription: "Open source documentation platform",
       brandLogo: null,
+      documentationName: "Documentation",
     });
   } catch (error) {
     return NextResponse.json(
@@ -22,7 +23,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const { brandName, brandDescription, brandLogo, primaryColor } = await req.json();
+    const { brandName, brandDescription, brandLogo, documentationName, primaryColor } = await req.json();
 
     const existing = await db.select().from(settings).limit(1);
 
@@ -33,6 +34,7 @@ export async function POST(req: NextRequest) {
           brandName,
           brandDescription,
           brandLogo,
+          documentationName,
           primaryColor,
           updatedAt: new Date(),
         })
@@ -43,6 +45,7 @@ export async function POST(req: NextRequest) {
         brandName,
         brandDescription,
         brandLogo,
+        documentationName,
         primaryColor,
         updatedAt: new Date(),
       });

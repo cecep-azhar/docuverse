@@ -36,15 +36,21 @@ export default function Editor({
 }) {
   const [showLinkDialog, setShowLinkDialog] = useState(false);
   const [showYouTubeDialog, setShowYouTubeDialog] = useState(false);
+  const [showVideoDialog, setShowVideoDialog] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
   const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
       StarterKit.configure({
-        // Allow HTML to be preserved
+        paragraph: {
+          HTMLAttributes: {
+            class: 'my-2',
+          },
+        },
       }),
       Image.configure({
         allowBase64: true,
@@ -71,7 +77,7 @@ export default function Editor({
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm dark:prose-invert max-w-none focus:outline-none',
+        class: 'prose prose-sm dark:prose-invert max-w-none focus:outline-none [&_video]:max-w-full [&_video]:h-auto [&_video]:rounded-lg',
       },
     },
   });
@@ -149,6 +155,30 @@ export default function Editor({
       setShowYouTubeDialog(false);
     } else {
       alert("Invalid YouTube URL");
+    }
+  };
+
+  const handleAddVideo = () => {
+    if (videoUrl.trim()) {
+      // Check if it's a direct video file (mp4, webm, etc)
+      const isDirectVideo = /\.(mp4|webm|ogg|mov)$/i.test(videoUrl);
+      
+      let videoHtml = '';
+      if (isDirectVideo) {
+        // Use HTML5 video tag for direct video files - inject raw HTML
+        videoHtml = `<p></p><div class="video-embed"><video controls controlsList="nodownload" style="width: 100%; max-width: 100%; height: auto; border-radius: 0.5rem; margin: 1rem 0;" src="${videoUrl}"></video></div><p></p>`;
+      } else {
+        // Use iframe for embed URLs
+        videoHtml = `<p></p><div class="video-embed" style="position: relative; width: 100%; padding-bottom: 56.25%; margin: 1rem 0;"><iframe style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 0.5rem; border: none;" src="${videoUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><p></p>`;
+      }
+      
+      // Insert as raw HTML
+      editor?.commands.insertContent(videoHtml);
+
+      setVideoUrl("");
+      setShowVideoDialog(false);
+    } else {
+      alert("Please enter a valid video URL");
     }
   };
 
@@ -256,6 +286,16 @@ export default function Editor({
           <PlayCircle className="h-4 w-4 mr-1" />
           YouTube
         </Button>
+
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={() => setShowVideoDialog(true)}
+        >
+          <PlayCircle className="h-4 w-4 mr-1" />
+          Video
+        </Button>
       </div>
 
       <EditorContent
@@ -315,6 +355,37 @@ export default function Editor({
               />
             </div>
             <Button onClick={handleAddYouTube}>Embed Video</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showVideoDialog} onOpenChange={setShowVideoDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Embed External Video</DialogTitle>
+            <DialogDescription>
+              Paste your video embed URL or iframe source (from CloudPanel, Vimeo, etc.)
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="video-url">Video URL</Label>
+              <Input
+                id="video-url"
+                placeholder="https://your-server.com/video/embed/123"
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleAddVideo();
+                  }
+                }}
+              />
+              <p className="text-xs text-muted-foreground">
+                Contoh: https://your-cloudpanel-server.com/videos/video.mp4 atau embed URL dari server Anda
+              </p>
+            </div>
+            <Button onClick={handleAddVideo}>Embed Video</Button>
           </div>
         </DialogContent>
       </Dialog>

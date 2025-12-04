@@ -9,10 +9,17 @@ import { users } from "@/lib/schema";
 import { getSettings } from "@/lib/settings";
 
 export default async function AdminLoginPage() {
-  // Check if setup is needed
+  // Check if setup is needed first
   const existingUsers = await db.select().from(users);
   if (existingUsers.length === 0) {
     redirect("/setup");
+  }
+
+  // Check if user is already logged in
+  const cookieStore = await cookies();
+  const session = cookieStore.get("admin_session");
+  if (session) {
+    redirect("/admin/dashboard");
   }
 
   const settingsData = await getSettings();
@@ -20,18 +27,31 @@ export default async function AdminLoginPage() {
   async function login(formData: FormData) {
     "use server";
     
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
+    try {
+      const email = formData.get("email") as string;
+      const password = formData.get("password") as string;
 
-    const user = await getUser(email);
-    if (user && await verifyPassword(password, user.passwordHash)) {
-        const cookieStore = await cookies();
-        cookieStore.set("admin_session", user.id, { httpOnly: true, maxAge: 60 * 60 * 24 * 7 }); // 7 days
-        redirect("/admin/dashboard");
+      const user = await getUser(email);
+      if (user && await verifyPassword(password, user.passwordHash)) {
+          const cookieStore = await cookies();
+          cookieStore.set("admin_session", user.id, { 
+            httpOnly: true, 
+            maxAge: 60 * 60 * 24 * 7,
+            path: "/",
+            sameSite: "lax"
+          }); // 7 days
+          redirect("/admin/dashboard");
+      }
+      
+      // Invalid credentials
+      redirect("/admin?error=invalid");
+    } catch (error) {
+      // If error is from redirect(), throw it again
+      if (error instanceof Error && error.message === 'NEXT_REDIRECT') {
+        throw error;
+      }
+      redirect("/admin?error=invalid");
     }
-    
-    // In a real app, handle error state
-    redirect("/admin?error=invalid");
   }
 
   return (

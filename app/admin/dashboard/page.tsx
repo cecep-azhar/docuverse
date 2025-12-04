@@ -123,7 +123,7 @@ export default async function DashboardPage() {
   const viewsStats = await getPageViewsStats();
 
   return (
-    <div className="flex-1 space-y-6 p-8 pt-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Dasbor</h2>

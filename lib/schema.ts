@@ -107,6 +107,7 @@ export const settings = sqliteTable('settings', {
   brandName: text('brand_name').notNull().default('Docuverse'),
   brandLogo: text('brand_logo'),
   brandDescription: text('brand_description'),
+  documentationName: text('documentation_name').notNull().default('Documentation'),
   primaryColor: text('primary_color').default('#000000'),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(new Date()),
 });

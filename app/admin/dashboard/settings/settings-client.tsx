@@ -13,6 +13,7 @@ export default function SettingsPage() {
   const [brandName, setBrandName] = useState("");
   const [brandDescription, setBrandDescription] = useState("");
   const [brandLogo, setBrandLogo] = useState("");
+  const [documentationName, setDocumentationName] = useState("");
   const router = useRouter();
 
   useEffect(() => {
@@ -22,6 +23,7 @@ export default function SettingsPage() {
         setBrandName(data.brandName || "");
         setBrandDescription(data.brandDescription || "");
         setBrandLogo(data.brandLogo || "");
+        setDocumentationName(data.documentationName || "Documentation");
       });
   }, []);
 
@@ -37,6 +39,7 @@ export default function SettingsPage() {
           brandName,
           brandDescription,
           brandLogo,
+          documentationName,
         }),
       });
 
@@ -53,7 +56,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="flex-1 space-y-6 p-8 pt-6">
+    <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
         <p className="text-muted-foreground mt-1">System settings dan konfigurasi</p>
@@ -76,6 +79,18 @@ export default function SettingsPage() {
                 onChange={(e) => setBrandName(e.target.value)}
                 placeholder="Docuverse"
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="documentationName">Documentation Name</Label>
+              <Input
+                id="documentationName"
+                value={documentationName}
+                onChange={(e) => setDocumentationName(e.target.value)}
+                placeholder="Documentation"
+              />
+              <p className="text-sm text-muted-foreground">
+                Nama yang ditampilkan di halaman dokumentasi
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="brandDescription">Brand Description</Label>

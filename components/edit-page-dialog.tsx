@@ -31,6 +31,7 @@ interface EditPageDialogProps {
     title: string;
     slug: string;
     content: string | null;
+    order?: number;
   };
 }
 
@@ -57,6 +58,7 @@ export function EditPageDialog({ page }: EditPageDialogProps) {
           title,
           slug,
           content,
+          order: parseInt(formData.get("order") as string) || 0,
         }),
       });
 
@@ -102,6 +104,19 @@ export function EditPageDialog({ page }: EditPageDialogProps) {
                 defaultValue={page.title}
                 required
               />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="order">Order</Label>
+              <Input
+                id="order"
+                name="order"
+                type="number"
+                min="0"
+                defaultValue={page.order || 0}
+              />
+              <p className="text-xs text-muted-foreground">
+                Determines the order in which pages appear in the sidebar (0 = first)
+              </p>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="content">Content</Label>

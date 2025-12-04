@@ -24,7 +24,7 @@ async function getAllPages() {
     .leftJoin(apps, eq(pages.appId, apps.id))
     .leftJoin(versions, eq(pages.versionId, versions.id))
     .leftJoin(languages, eq(pages.languageId, languages.id))
-    .orderBy(pages.createdAt);
+    .orderBy(pages.order, pages.createdAt);
 
   return allPages;
 }
@@ -40,7 +40,7 @@ export default async function PagesPage() {
   const canDeletePages = canDelete(currentUser.role);
 
   return (
-    <div className="flex-1 space-y-6 p-8 pt-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Halaman</h2>
@@ -78,14 +78,14 @@ export default async function PagesPage() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {allPages.map(({ page, app, version, language }) => (
+          {allPages.map(({ page, app, version, language }, index) => (
             <Card key={page.id} className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <FileText className="h-5 w-5 text-primary" />
-                      <CardTitle className="text-xl">{page.title}</CardTitle>
+                      <CardTitle className="text-xl">{page.order + 1}. {page.title}</CardTitle>
                     </div>
                     <div className="flex flex-wrap gap-2 items-center text-sm text-muted-foreground">
                       <span className="font-medium text-foreground">{app?.name || 'Unknown App'}</span>

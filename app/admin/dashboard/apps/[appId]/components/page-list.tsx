@@ -12,13 +12,16 @@ interface PageListProps {
     slug: string;
     content: string | null;
     isFolder: boolean;
+    order: number;
   }>;
 }
 
 export function PageList({ pages }: PageListProps) {
+  const sortedPages = [...pages].sort((a, b) => a.order - b.order);
+
   return (
     <div className="divide-y">
-      {pages.map(page => (
+      {sortedPages.map((page, index) => (
         <div key={page.id} className="group relative">
           <div className="p-4 hover:bg-accent/50 transition-colors flex items-center justify-between cursor-pointer"
                onClick={(e) => {
@@ -35,7 +38,7 @@ export function PageList({ pages }: PageListProps) {
                 <FileText className="h-4 w-4 text-muted-foreground" />
               )}
               <div>
-                <div className="font-medium">{page.title}</div>
+                <div className="font-medium">{index + 1}. {page.title}</div>
                 <div className="text-xs text-muted-foreground">/{page.slug}</div>
               </div>
             </div>

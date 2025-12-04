@@ -36,11 +36,11 @@ function SidebarItem({ page, currentSlug, depth = 0 }: { page: any, currentSlug:
                 {!hasChildren && page.isFolder && (
                     <ChevronRight className="h-3 w-3" />
                 )}
-                {page.title}
+                {page.order + 1}. {page.title}
             </Link>
             {hasChildren && (
                 <div className="mt-1">
-                    {page.children.map((child: any) => (
+                    {page.children.map((child: any, idx: number) => (
                         <SidebarItem key={child.id} page={child} currentSlug={currentSlug} depth={depth + 1} />
                     ))}
                 </div>
@@ -254,7 +254,7 @@ export default async function PublicPage({ params }: { params: Promise<{ appSlug
                     <div className="prose prose-gray dark:prose-invert max-w-none">
                         {currentPage.content ? (
                             <div 
-                                className="[&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_iframe]:w-full [&_iframe]:aspect-video [&_iframe]:rounded-lg [&_.youtube-video]:w-full [&_.youtube-video]:aspect-video [&_.youtube-video]:rounded-lg [&_a]:text-blue-500 [&_a]:underline [&_a]:hover:text-blue-700"
+                                className="[&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_iframe]:w-full [&_iframe]:aspect-video [&_iframe]:rounded-lg [&_video]:w-full [&_video]:max-w-full [&_video]:h-auto [&_video]:rounded-lg [&_video]:my-4 [&_.youtube-embed]:my-6 [&_.youtube-embed_iframe]:border-0 [&_.video-embed]:my-6 [&_.video-embed_iframe]:border-0 [&_.video-embed_video]:w-full [&_.video-embed_video]:max-w-full [&_a]:text-blue-500 [&_a]:underline [&_a]:hover:text-blue-700"
                                 dangerouslySetInnerHTML={{ __html: currentPage.content }}
                             />
                         ) : (

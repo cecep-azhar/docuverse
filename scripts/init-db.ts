@@ -102,6 +102,7 @@ async function init() {
       brand_name TEXT NOT NULL DEFAULT 'Docuverse',
       brand_logo TEXT,
       brand_description TEXT,
+      documentation_name TEXT NOT NULL DEFAULT 'Documentation',
       primary_color TEXT DEFAULT '#000000',
       updated_at INTEGER NOT NULL
     );
@@ -143,8 +144,8 @@ async function init() {
 
   // Seed default settings
   await client.execute({
-    sql: `INSERT INTO settings (id, brand_name, brand_description, updated_at) VALUES (?, ?, ?, ?)`,
-    args: ["default", "Docuverse", "Beautiful open-source documentation platform", Math.floor(Date.now() / 1000)]
+    sql: `INSERT INTO settings (id, brand_name, brand_description, documentation_name, updated_at) VALUES (?, ?, ?, ?, ?)`,
+    args: ["default", "Docuverse", "Beautiful open-source documentation platform", "Documentation", Math.floor(Date.now() / 1000)]
   });
 
   console.log("✅ Default settings created");
@@ -191,7 +192,7 @@ async function init() {
       languageId,
       "introduction",
       "Introduction",
-      "# Welcome to Docuverse\n\nThis is a demo documentation page.\n\n## Features\n\n- Multi-app support\n- Version control\n- Multi-language\n- Beautiful UI",
+      "<h1>Welcome to Docuverse</h1><p>This is a demo documentation page.</p><h2>Features</h2><ul><li>Multi-app support</li><li>Version control</li><li>Multi-language</li><li>Beautiful UI</li></ul>",
       0,
       null,
       0,
@@ -209,7 +210,7 @@ async function init() {
       languageId,
       "installation",
       "Installation",
-      "# Installation\n\n## Quick Start\n\n```bash\nnpm install docuverse\n```\n\n## Configuration\n\nEdit your config file...",
+      "<h1>Installation</h1><h2>Quick Start</h2><pre><code>bash npm install docuverse</code></pre><h2>Configuration</h2><p>Edit your config file...</p><div class=\"youtube-embed\" style=\"position: relative; width: 100%; padding-bottom: 56.25%; margin: 1rem 0;\"><iframe style=\"position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 0.5rem;\" src=\"https://www.youtube.com/embed/AGn74aib6sl\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe></div>",
       1,
       null,
       0,

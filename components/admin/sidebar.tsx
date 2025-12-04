@@ -78,7 +78,7 @@ export default function Sidebar({ isMobile = false, brandName = "Docuverse", bra
             const isActive = pathname === item.href;
 
             return (
-              <Link key={item.name} href={item.href}>
+              <Link key={item.name} href={item.href} prefetch={false}>
                 <Button
                   variant={isActive ? "secondary" : "ghost"}
                   className={cn(

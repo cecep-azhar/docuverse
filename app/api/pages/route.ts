@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 
 export async function POST(req: NextRequest) {
   try {
-    const { appId, versionId, languageId, title, slug, content, parentId, isFolder } = await req.json();
+    const { appId, versionId, languageId, title, slug, content, parentId, isFolder, order } = await req.json();
 
     const pageId = uuidv4();
 
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
       slug,
       title,
       content: content || "",
-      order: 0,
+      order: order || 0,
       parentId: parentId || null,
       isFolder: isFolder || false,
       createdAt: new Date(),
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   try {
-    const { id, title, content, slug } = await req.json();
+    const { id, title, content, slug, order } = await req.json();
 
     await db
       .update(pages)
@@ -45,6 +45,7 @@ export async function PUT(req: NextRequest) {
         title,
         content,
         slug,
+        order: order || 0,
         updatedAt: new Date(),
       })
       .where(eq(pages.id, id));

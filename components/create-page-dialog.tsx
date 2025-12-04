@@ -57,6 +57,7 @@ export function CreatePageDialog({ appId, versionId, languageId }: CreatePageDia
           title,
           slug,
           content,
+          order: parseInt(formData.get("order") as string) || 0,
           isFolder: false,
         }),
       });
@@ -101,6 +102,20 @@ export function CreatePageDialog({ appId, versionId, languageId }: CreatePageDia
                 placeholder="Getting Started"
                 required
               />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="order">Order</Label>
+              <Input
+                id="order"
+                name="order"
+                type="number"
+                min="0"
+                defaultValue="0"
+                placeholder="0"
+              />
+              <p className="text-xs text-muted-foreground">
+                Determines the order in which pages appear in the sidebar (0 = first)
+              </p>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="content">Content</Label>

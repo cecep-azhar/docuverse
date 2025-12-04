@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/sheet";
 import { getCurrentUser } from "@/lib/permissions";
 import { getSettings } from "@/lib/settings";
+import { validateSession } from "@/lib/auth";
+import { SessionValidator } from "@/components/session-validator";
 import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -30,9 +32,9 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = await cookies();
-  const session = cookieStore.get("admin_session");
-  if (!session) {
+  // Validate session
+  const user = await validateSession();
+  if (!user) {
     redirect("/admin");
   }
 
@@ -43,6 +45,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex min-h-screen w-full bg-muted/40">
+      <SessionValidator />
       <Sidebar brandName={settingsData.brandName} brandLogo={settingsData.brandLogo} />
       <div className="flex flex-1 flex-col sm:pl-64">
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 sm:px-6">

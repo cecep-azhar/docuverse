@@ -63,3 +63,61 @@
     background-image: radial-gradient(circle, var(--tw-gradient-stops));
   }
 }
+
+/* YouTube Embed Styles */
+.youtube-embed {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%;
+  margin: 1rem 0;
+}
+
+.youtube-embed iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0.5rem;
+  border: none;
+}
+
+/* Video Embed Styles (External Videos) */
+.video-embed {
+  position: relative;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.video-embed iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0.5rem;
+  border: none;
+}
+
+.video-embed video {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  border-radius: 0.5rem;
+  display: block;
+}
+
+/* Ensure video works in editor */
+.ProseMirror video {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+/* Prose YouTube and Video embed support */
+.prose .youtube-embed,
+.prose .video-embed {
+  margin: 1.5rem 0;
+}
