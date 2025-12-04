@@ -4,20 +4,13 @@ import * as dotenv from "dotenv";
 dotenv.config({ path: ".env.development.local", override: true });
 dotenv.config({ path: ".env", override: true });
 
-const isProduction = process.env.TURSO_DATABASE_URL && process.env.TURSO_AUTH_TOKEN;
-
 export default defineConfig({
   schema: "./lib/schema.ts",
   out: "./migrations",
   dialect: "sqlite",
-  dbCredentials: isProduction 
-    ? {
-        url: process.env.TURSO_DATABASE_URL!,
-        authToken: process.env.TURSO_AUTH_TOKEN!,
-      }
-    : {
-        url: "file:./local.db",
-      },
+  dbCredentials: {
+    url: process.env.TURSO_DATABASE_URL || "file:./local.db",
+    ...(process.env.TURSO_AUTH_TOKEN && { authToken: process.env.TURSO_AUTH_TOKEN }),
+  },
   verbose: true,
-  // Tambah migrasi page_views
 });
