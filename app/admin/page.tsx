@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { verifyPassword, getUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { users } from "@/lib/schema";
+import { getSettings } from "@/lib/settings";
 
 export default async function AdminLoginPage() {
   // Check if setup is needed
@@ -13,6 +14,8 @@ export default async function AdminLoginPage() {
   if (existingUsers.length === 0) {
     redirect("/setup");
   }
+
+  const settingsData = await getSettings();
 
   async function login(formData: FormData) {
     "use server";
@@ -34,6 +37,15 @@ export default async function AdminLoginPage() {
   return (
     <div className="w-full max-w-sm p-6 bg-background rounded-lg border shadow-sm">
       <div className="flex flex-col space-y-2 text-center mb-6">
+        {settingsData.brandLogo && (
+          <div className="flex justify-center mb-4">
+            <img 
+              src={settingsData.brandLogo} 
+              alt={settingsData.brandName}
+              className="h-12 w-auto"
+            />
+          </div>
+        )}
         <h1 className="text-2xl font-semibold tracking-tight">Login Admin</h1>
         <p className="text-sm text-muted-foreground">
           Enter your email below to login to your account

@@ -119,13 +119,24 @@ async function init() {
 
   console.log("✅ Tables created");
 
-  // Seed admin user
-  const adminId = uuidv4();
-  const passwordHash = bcrypt.hashSync("admin", 10);
+  // Seed super admin user
+  const superAdminId = uuidv4();
+  const superAdminPasswordHash = bcrypt.hashSync("superadmin", 10);
 
   await client.execute({
     sql: `INSERT INTO users (id, email, password_hash, role) VALUES (?, ?, ?, ?)`,
-    args: [adminId, "admin@docuverse.com", passwordHash, "admin"]
+    args: [superAdminId, "superadmin@docuverse.com", superAdminPasswordHash, "super_admin"]
+  });
+
+  console.log("✅ Super Admin user created (superadmin@docuverse.com / superadmin)");
+
+  // Seed regular admin user
+  const adminId = uuidv4();
+  const adminPasswordHash = bcrypt.hashSync("admin", 10);
+
+  await client.execute({
+    sql: `INSERT INTO users (id, email, password_hash, role) VALUES (?, ?, ?, ?)`,
+    args: [adminId, "admin@docuverse.com", adminPasswordHash, "admin"]
   });
 
   console.log("✅ Admin user created (admin@docuverse.com / admin)");
@@ -212,7 +223,9 @@ async function init() {
   console.log("\nYou can now:");
   console.log("- Visit http://localhost:3000");
   console.log("- Login to admin at http://localhost:3000/admin");
-  console.log("- Credentials: admin@docuverse.com / admin");
+  console.log("\nAvailable credentials:");
+  console.log("  Super Admin: superadmin@docuverse.com / superadmin");
+  console.log("  Admin: admin@docuverse.com / admin");
 
   client.close();
 }
