@@ -51,6 +51,8 @@ export default function Editor({
             class: 'my-2',
           },
         },
+        // Allow HTML tags including video
+        codeBlock: false,
       }),
       Image.configure({
         allowBase64: true,
@@ -79,6 +81,10 @@ export default function Editor({
       attributes: {
         class: 'prose prose-sm dark:prose-invert max-w-none focus:outline-none [&_video]:max-w-full [&_video]:h-auto [&_video]:rounded-lg',
       },
+    },
+    // Parse HTML properly including video tags
+    parseOptions: {
+      preserveWhitespace: 'full',
     },
   });
 
@@ -163,17 +169,16 @@ export default function Editor({
       // Check if it's a direct video file (mp4, webm, etc)
       const isDirectVideo = /\.(mp4|webm|ogg|mov)$/i.test(videoUrl);
       
-      let videoHtml = '';
+      // Create a placeholder that will be replaced on render
+      let videoPlaceholder = '';
       if (isDirectVideo) {
-        // Use HTML5 video tag for direct video files - inject raw HTML
-        videoHtml = `<p></p><div class="video-embed"><video controls controlsList="nodownload" style="width: 100%; max-width: 100%; height: auto; border-radius: 0.5rem; margin: 1rem 0;" src="${videoUrl}"></video></div><p></p>`;
+        videoPlaceholder = `[VIDEO:${videoUrl}]`;
       } else {
-        // Use iframe for embed URLs
-        videoHtml = `<p></p><div class="video-embed" style="position: relative; width: 100%; padding-bottom: 56.25%; margin: 1rem 0;"><iframe style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 0.5rem; border: none;" src="${videoUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><p></p>`;
+        videoPlaceholder = `[IFRAME:${videoUrl}]`;
       }
       
-      // Insert as raw HTML
-      editor?.commands.insertContent(videoHtml);
+      // Insert placeholder as plain text wrapped in paragraph
+      editor?.commands.insertContent(`<p>${videoPlaceholder}</p>`);
 
       setVideoUrl("");
       setShowVideoDialog(false);

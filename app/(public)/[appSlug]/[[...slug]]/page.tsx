@@ -255,7 +255,17 @@ export default async function PublicPage({ params }: { params: Promise<{ appSlug
                         {currentPage.content ? (
                             <div 
                                 className="[&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_iframe]:w-full [&_iframe]:aspect-video [&_iframe]:rounded-lg [&_video]:w-full [&_video]:max-w-full [&_video]:h-auto [&_video]:rounded-lg [&_video]:my-4 [&_.youtube-embed]:my-6 [&_.youtube-embed_iframe]:border-0 [&_.video-embed]:my-6 [&_.video-embed_iframe]:border-0 [&_.video-embed_video]:w-full [&_.video-embed_video]:max-w-full [&_a]:text-blue-500 [&_a]:underline [&_a]:hover:text-blue-700"
-                                dangerouslySetInnerHTML={{ __html: currentPage.content }}
+                                dangerouslySetInnerHTML={{ 
+                                  __html: currentPage.content
+                                    // Replace [VIDEO:url] with actual video tag
+                                    .replace(/\[VIDEO:(.*?)\]/g, (_: string, url: string) => 
+                                      `<video controls controlsList="nodownload" style="width: 100%; max-width: 100%; height: auto; border-radius: 0.5rem; margin: 1rem 0;" src="${url}"></video>`
+                                    )
+                                    // Replace [IFRAME:url] with iframe embed
+                                    .replace(/\[IFRAME:(.*?)\]/g, (_: string, url: string) => 
+                                      `<div class="video-embed" style="position: relative; width: 100%; padding-bottom: 56.25%; margin: 1rem 0;"><iframe style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 0.5rem; border: none;" src="${url}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`
+                                    )
+                                }}
                             />
                         ) : (
                             <p className="text-muted-foreground">No content available.</p>
