@@ -1,6 +1,6 @@
-import { db } from "@docuverse/database";
-import { apps, pages, users } from "@docuverse/database";
-import { StatsCard } from "@docuverse/ui/admin/stats-card";
+import { db } from "@/lib/db";
+import { apps, pages, users, pageViews } from "@/lib/schema";
+import { StatsCard } from "@/components/admin/stats-card";
 import { 
   FileText, 
   FolderKanban, 
@@ -9,12 +9,13 @@ import {
   TrendingUp,
   Activity
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@docuverse/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
-import { Button } from "@docuverse/ui/button";
+import { Button } from "@/components/ui/button";
 import { sql } from "drizzle-orm";
-import { CreateAppDialog } from "@docuverse/ui/create-app-dialog";
-import { DeleteAppButton } from "@docuverse/ui/delete-app-button";
+import { CreateAppDialog } from "@/components/create-app-dialog";
+import { DeleteAppButton } from "@/components/delete-app-button";
+import StatsViewsChart from "@/components/admin/stats-views-chart";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -46,14 +47,65 @@ async function getStats() {
   }
 }
 
+async function getPageViewsStats() {
+  const totalViewsRes = await db.select({ count: sql<number>`count(*)` }).from(pageViews);
+  const totalViews = Number(totalViewsRes[0]?.count || 0);
+
+  // Statistik harian (30 hari terakhir)
+  const now = new Date();
+  const days: string[] = [];
+  const viewsPerDay: number[] = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    d.setHours(0, 0, 0, 0);
+    const label = d.toLocaleString('default', { month: 'short', day: 'numeric' });
+    days.push(label);
+    
+    const startOfDay = Math.floor(d.getTime() / 1000);
+    const endOfDay = Math.floor((d.getTime() + 24 * 60 * 60 * 1000) / 1000);
+    
+    const res = await db.select({ count: sql<number>`count(*)` })
+      .from(pageViews)
+      .where(sql`viewed_at >= ${startOfDay} AND viewed_at < ${endOfDay}`);
+    viewsPerDay.push(Number(res[0]?.count || 0));
+  }
+
+  // Statistik bulanan (12 bulan terakhir)
+  const months: string[] = [];
+  const viewsPerMonth: number[] = [];
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const label = d.toLocaleString('default', { month: 'short', year: '2-digit' });
+    months.push(label);
+    
+    const startOfMonth = Math.floor(new Date(d.getFullYear(), d.getMonth(), 1).getTime() / 1000);
+    const endOfMonth = Math.floor(new Date(d.getFullYear(), d.getMonth() + 1, 1).getTime() / 1000);
+    
+    const res = await db.select({ count: sql<number>`count(*)` })
+      .from(pageViews)
+      .where(sql`viewed_at >= ${startOfMonth} AND viewed_at < ${endOfMonth}`);
+    viewsPerMonth.push(Number(res[0]?.count || 0));
+  }
+
+  return { 
+    totalViews, 
+    dailyLabels: days, 
+    dailyData: viewsPerDay,
+    monthlyLabels: months,
+    monthlyData: viewsPerMonth
+  };
+}
+
 export default async function DashboardPage() {
   const stats = await getStats();
+  const viewsStats = await getPageViewsStats();
 
   return (
     <div className="flex-1 space-y-6 p-8 pt-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+          <h2 className="text-3xl font-bold tracking-tight">Dasbor</h2>
           <p className="text-muted-foreground mt-1">
             Ringkasan aktivitas dan statistik
           </p>
@@ -76,22 +128,48 @@ export default async function DashboardPage() {
           icon={FileText}
         />
         <StatsCard
-          title="Total Users"
+          title="Total Pengguna"
           value={stats.totalUsers}
-          description="Jumlah users terdaftar"
+          description="Jumlah pengguna terdaftar"
           icon={UsersIcon}
         />
         <StatsCard
-          title="Total Views"
-          value="0"
+          title="Total Pembaca"
+          value={viewsStats.totalViews}
           description="Total kunjungan halaman"
           icon={Eye}
         />
       </div>
 
-      {/* Recent Activity */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
+      {/* Analytics Charts */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              Statistik Pembaca Sebulan Terakhir
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <StatsViewsChart labels={viewsStats.dailyLabels} data={viewsStats.dailyData} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              Statistik Pembaca Setahun Terakhir
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <StatsViewsChart labels={viewsStats.monthlyLabels} data={viewsStats.monthlyData} />
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Recent Activity & Summary */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Activity className="h-5 w-5" />
@@ -106,70 +184,63 @@ export default async function DashboardPage() {
                 <CreateAppDialog />
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {stats.recentApps.map((app) => (
                   <div
                     key={app.id}
-                    className="flex items-center gap-4 p-3 rounded-lg hover:bg-accent transition-colors"
+                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors"
                   >
                     {app.logoUrl ? (
                       <img
                         src={app.logoUrl}
                         alt={app.name}
-                        className="h-10 w-10 rounded object-cover"
+                        className="h-9 w-9 rounded object-cover"
                       />
                     ) : (
-                      <div className="h-10 w-10 rounded bg-primary/10 flex items-center justify-center">
-                        <FolderKanban className="h-5 w-5 text-primary" />
+                      <div className="h-9 w-9 rounded bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <FolderKanban className="h-4 w-4 text-primary" />
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{app.name}</p>
-                      <p className="text-sm text-muted-foreground truncate">
-                        /{app.slug}
-                      </p>
+                      <p className="font-medium text-sm truncate">{app.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">/{app.slug}</p>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <DeleteAppButton appId={app.id} appName={app.name} />
-                      <Button variant="ghost" size="sm" asChild>
-                        <Link href={`/admin/dashboard/apps/${app.id}`}>
-                          Kelola
-                        </Link>
-                      </Button>
-                    </div>
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link href={`/admin/dashboard/apps/${app.id}`}>Kelola</Link>
+                    </Button>
                   </div>
                 ))}
               </div>
             )}
           </CardContent>
         </Card>
-
-        <Card className="col-span-3">
+        
+        <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-lg">
               <TrendingUp className="h-5 w-5" />
-              Statistik Bulanan
+              Ringkasan
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Halaman Dibuat</span>
-                <span className="font-semibold">{stats.totalPages}</span>
+            <div className="space-y-3">
+              <div>
+                <p className="text-xs text-muted-foreground mb-0.5">Total Halaman</p>
+                <p className="text-lg font-bold">{stats.totalPages}</p>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Aplikasi Aktif</span>
-                <span className="font-semibold">{stats.totalApps}</span>
+              <div>
+                <p className="text-xs text-muted-foreground mb-0.5">Aplikasi Aktif</p>
+                <p className="text-lg font-bold">{stats.totalApps}</p>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Total Views</span>
-                <span className="font-semibold">0</span>
+              <div>
+                <p className="text-xs text-muted-foreground mb-0.5">Total Pembaca</p>
+                <p className="text-lg font-bold">{viewsStats.totalViews}</p>
               </div>
-              <div className="pt-4 border-t">
+              <div className="pt-2 border-t">
                 <p className="text-xs text-muted-foreground">
-                  Diperbarui: {new Date().toLocaleDateString('id-ID', { 
+                  Perbarui: {new Date().toLocaleDateString('id-ID', { 
                     day: 'numeric',
-                    month: 'long', 
+                    month: 'short', 
                     year: 'numeric' 
                   })}
                 </p>
@@ -177,11 +248,6 @@ export default async function DashboardPage() {
             </div>
           </CardContent>
         </Card>
-      </div>
-
-      {/* Footer */}
-      <div className="text-center text-sm text-muted-foreground pt-8">
-        Development by Software Engineering RND Gerlink {new Date().getFullYear()}
       </div>
     </div>
   );

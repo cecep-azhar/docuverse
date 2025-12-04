@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
-import { db } from "@docuverse/database";
-import { users } from "@docuverse/database";
+import { db } from "@/lib/db";
+import { users } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 
 export type UserRole = 'super_admin' | 'admin';

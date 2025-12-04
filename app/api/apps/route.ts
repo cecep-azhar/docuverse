@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@docuverse/database";
-import { apps, versions, languages } from "@docuverse/database";
+import { db } from "@/lib/db";
+import { apps, versions, languages } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 

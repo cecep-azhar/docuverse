@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { db } from "@docuverse/database";
-import { apps } from "@docuverse/database";
+import { db } from "@/lib/db";
+import { apps } from "@/lib/schema";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;

@@ -13,9 +13,11 @@ export default defineConfig({
   dbCredentials: isProduction 
     ? {
         url: process.env.TURSO_DATABASE_URL!,
+        authToken: process.env.TURSO_AUTH_TOKEN!,
       }
     : {
         url: "file:./local.db",
       },
   verbose: true,
+  // Tambah migrasi page_views
 });

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@docuverse/database";
-import { users } from "@docuverse/database";
+import { db } from "@/lib/db";
+import { users } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcryptjs";
@@ -39,8 +39,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json({ error: "Invalid email format" }, { status: 400 });
+    }
+
     if (password.length < 8) {
       return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 });
+    }
+
+    // Validate role
+    if (role && !['admin', 'super_admin'].includes(role)) {
+      return NextResponse.json({ error: "Invalid role" }, { status: 400 });
     }
 
     // Check if email already exists
@@ -85,13 +96,35 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "ID and email are required" }, { status: 400 });
     }
 
-    // Check if email already exists for other users
-    const existingUser = await db.query.users.findFirst({
-      where: eq(users.email, email),
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json({ error: "Invalid email format" }, { status: 400 });
+    }
+
+    // Check if user exists
+    const userToUpdate = await db.query.users.findFirst({
+      where: eq(users.id, id),
     });
 
-    if (existingUser && existingUser.id !== id) {
-      return NextResponse.json({ error: "Email already exists" }, { status: 400 });
+    if (!userToUpdate) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // Check if email already exists for other users (only if email is being changed)
+    if (email !== userToUpdate.email) {
+      const existingUser = await db.query.users.findFirst({
+        where: eq(users.email, email),
+      });
+
+      if (existingUser) {
+        return NextResponse.json({ error: "Email already exists" }, { status: 400 });
+      }
+    }
+
+    // Validate role
+    if (role && !['admin', 'super_admin'].includes(role)) {
+      return NextResponse.json({ error: "Invalid role" }, { status: 400 });
     }
 
     const updateData: any = {
@@ -135,6 +168,15 @@ export async function DELETE(request: NextRequest) {
     // Prevent deleting yourself
     if (id === currentUser.id) {
       return NextResponse.json({ error: "Cannot delete your own account" }, { status: 400 });
+    }
+
+    // Check if user exists before deleting
+    const userToDelete = await db.query.users.findFirst({
+      where: eq(users.id, id),
+    });
+
+    if (!userToDelete) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     await db.delete(users).where(eq(users.id, id));

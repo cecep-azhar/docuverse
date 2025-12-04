@@ -110,3 +110,16 @@ export const settings = sqliteTable('settings', {
   primaryColor: text('primary_color').default('#000000'),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(new Date()),
 });
+
+export const pageViews = sqliteTable('page_views', {
+  id: text('id').primaryKey(),
+  pageId: text('page_id').notNull().references(() => pages.id, { onDelete: 'cascade' }),
+  viewedAt: integer('viewed_at', { mode: 'timestamp' }).notNull().default(new Date()),
+});
+
+export const pageViewsRelations = relations(pageViews, ({ one }) => ({
+  page: one(pages, {
+    fields: [pageViews.pageId],
+    references: [pages.id],
+  }),
+}));

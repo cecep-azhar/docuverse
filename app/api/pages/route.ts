@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@docuverse/database";
-import { pages } from "@docuverse/database";
+import { db } from "@/lib/db";
+import { pages } from "@/lib/schema";
 import { v4 as uuidv4 } from "uuid";
 import { eq } from "drizzle-orm";
 

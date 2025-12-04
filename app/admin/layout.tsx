@@ -1,8 +1,17 @@
 import { Metadata } from "next";
+import { getSettings } from "@/lib/settings";
 
-export const metadata: Metadata = {
-  title: "Admin Login - Docuverse",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settingsData = await getSettings();
+  
+  return {
+    title: `Admin Login - ${settingsData.brandName}`,
+    description: settingsData.brandDescription || `Admin login for ${settingsData.brandName}`,
+    icons: {
+      icon: settingsData.brandLogo || "/favicon.ico",
+    },
+  };
+}
 
 export default function AdminLayout({
   children,

@@ -1,14 +1,14 @@
-import { db } from "@docuverse/database";
-import { users } from "@docuverse/database";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@docuverse/ui/card";
-import { Button } from "@docuverse/ui/button";
+import { db } from "@/lib/db";
+import { users } from "@/lib/schema";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Users as UsersIcon, Plus, Mail, Calendar, Shield } from "lucide-react";
-import { Badge } from "@docuverse/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { getCurrentUser, canManageUsers } from "@/lib/permissions";
 import { redirect } from "next/navigation";
-import { CreateUserDialog } from "@docuverse/ui/create-user-dialog";
-import { EditUserDialog } from "@docuverse/ui/edit-user-dialog";
-import { DeleteUserButton } from "@docuverse/ui/delete-user-button";
+import { CreateUserDialog } from "@/components/create-user-dialog";
+import { EditUserDialog } from "@/components/edit-user-dialog";
+import { DeleteUserButton } from "@/components/delete-user-button";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -23,7 +23,7 @@ export default async function UsersPage() {
   const allUsers = await db.select().from(users);
 
   return (
-    <div className="flex-1 space-y-6">
+    <div className="flex-1 space-y-6 p-8 pt-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Users</h2>
@@ -95,16 +95,6 @@ export default async function UsersPage() {
         </div>
       )}
 
-      <Card className="border-dashed">
-        <CardContent className="py-8">
-          <p className="text-center text-sm text-muted-foreground">
-            {canManage 
-              ? "Gunakan tombol di atas untuk menambah user baru"
-              : "Hanya Super Admin yang dapat mengelola users"
-            }
-          </p>
-        </CardContent>
-      </Card>
     </div>
   );
 }

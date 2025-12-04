@@ -1,11 +1,11 @@
-import { db } from "@docuverse/database";
-import { apps, settings } from "@docuverse/database";
+import { db } from "@/lib/db";
+import { apps, settings } from "@/lib/schema";
 import Link from "next/link";
 import { BookOpen, ArrowRight, Github } from "lucide-react";
-import { ThemeToggle } from "@docuverse/ui";
-import { NetworkBackground } from "@docuverse/ui";
-import { Card } from "@docuverse/ui/card";
-import { Button } from "@docuverse/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { NetworkBackground } from "@/components/network-background";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -40,7 +40,7 @@ export default async function HomePage() {
 
       <div className="relative z-10">
         <header className="sticky top-0 z-20">
-          <div className="container flex h-16 items-center justify-between">
+          <div className="container flex h-16 items-center justify-end">
             <nav className="flex items-center gap-2">
               <ThemeToggle />
               {/* <Button asChild size="sm">
@@ -164,22 +164,12 @@ export default async function HomePage() {
           </section>
         </main>
 
-        <footer className="border-t bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <footer className="border-t bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex justify-center">
           <div className="container py-6">
-            <div className="flex flex-col items-center justify-between gap-4 text-sm text-muted-foreground md:flex-row">
+            <div className="flex flex-col items-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <BookOpen className="h-4 w-4" />
-                <span>Powered by {brand.brandName}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Link
-                  href="https://github.com"
-                  target="_blank"
-                  className="transition-colors hover:text-foreground"
-                  aria-label="GitHub"
-                >
-                  <Github className="h-4 w-4" />
-                </Link>
+                <span>Powered by {brand.brandName} © {new Date().getFullYear()}</span>
               </div>
             </div>
           </div>

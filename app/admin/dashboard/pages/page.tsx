@@ -1,11 +1,11 @@
-import { db } from "@docuverse/database";
-import { pages, apps, versions, languages } from "@docuverse/database";
+import { db } from "@/lib/db";
+import { pages, apps, versions, languages } from "@/lib/schema";
 import { eq } from "drizzle-orm";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@docuverse/ui/card";
-import { Button } from "@docuverse/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { FileText, ExternalLink, FolderKanban } from "lucide-react";
 import Link from "next/link";
-import { DeletePageButton } from "@docuverse/ui/delete-page-button";
+import { DeletePageButton } from "@/components/delete-page-button";
 import { getCurrentUser, canDelete } from "@/lib/permissions";
 import { redirect } from "next/navigation";
 
@@ -40,7 +40,7 @@ export default async function PagesPage() {
   const canDeletePages = canDelete(currentUser.role);
 
   return (
-    <div className="flex-1 space-y-6">
+    <div className="flex-1 space-y-6 p-8 pt-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Halaman</h2>

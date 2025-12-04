@@ -41,6 +41,7 @@ export default function Editor({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         // Allow HTML to be preserved

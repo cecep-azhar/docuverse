@@ -38,11 +38,24 @@ export function CreateUserDialog() {
     const password = formData.get("password") as string;
     const role = formData.get("role") as string;
 
+    // Client-side validation
+    if (!email || !email.includes('@')) {
+      alert("Email tidak valid");
+      setLoading(false);
+      return;
+    }
+
+    if (!password || password.length < 8) {
+      alert("Password minimal 8 karakter");
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch("/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name, password, role }),
+        body: JSON.stringify({ email, name: name || null, password, role }),
       });
 
       if (res.ok) {

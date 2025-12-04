@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@docuverse/ui/button";
-import { Input } from "@docuverse/ui/input";
-import { Label } from "@docuverse/ui/label";
-import { Textarea } from "@docuverse/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@docuverse/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(false);
@@ -53,10 +53,10 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex-1 space-y-6 p-8 pt-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
-        <p className="text-muted-foreground">Manage your branding and site settings.</p>
+        <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
+        <p className="text-muted-foreground mt-1">System settings dan konfigurasi</p>
       </div>
 
       <Card>

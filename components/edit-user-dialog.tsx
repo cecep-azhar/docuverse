@@ -46,6 +46,19 @@ export function EditUserDialog({ user }: EditUserDialogProps) {
     const password = formData.get("password") as string;
     const role = formData.get("role") as string;
 
+    // Client-side validation
+    if (!email || !email.includes('@')) {
+      alert("Email tidak valid");
+      setLoading(false);
+      return;
+    }
+
+    if (password && password.length < 8) {
+      alert("Password minimal 8 karakter");
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch("/api/users", {
         method: "PUT",
@@ -53,7 +66,7 @@ export function EditUserDialog({ user }: EditUserDialogProps) {
         body: JSON.stringify({ 
           id: user.id, 
           email, 
-          name, 
+          name: name || null, 
           password: password || undefined, 
           role 
         }),

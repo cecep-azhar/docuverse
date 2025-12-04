@@ -1,11 +1,11 @@
-import { db } from "@docuverse/database";
-import { apps } from "@docuverse/database";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@docuverse/ui/card";
-import { Button } from "@docuverse/ui/button";
+import { db } from "@/lib/db";
+import { apps } from "@/lib/schema";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { FolderKanban, Plus, Settings, ExternalLink } from "lucide-react";
 import Link from "next/link";
-import { CreateAppDialog } from "@docuverse/ui/create-app-dialog";
-import { DeleteAppButton } from "@docuverse/ui/delete-app-button";
+import { CreateAppDialog } from "@/components/create-app-dialog";
+import { DeleteAppButton } from "@/components/delete-app-button";
 import { getCurrentUser, canDelete } from "@/lib/permissions";
 import { redirect } from "next/navigation";
 
@@ -22,7 +22,7 @@ export default async function AppsPage() {
   const canDeleteApps = canDelete(currentUser.role);
 
   return (
-    <div className="flex-1 space-y-6">
+    <div className="flex-1 space-y-6 p-8 pt-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Aplikasi</h2>

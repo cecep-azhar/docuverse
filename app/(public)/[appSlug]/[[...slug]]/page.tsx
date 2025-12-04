@@ -9,6 +9,8 @@ import { Menu, Search, ChevronRight, ChevronDown, Home, BookOpen } from "lucide-
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SearchButton } from "@/components/search-button";
+import { getSettings } from "@/lib/settings";
+import PageViewTracker from "@/components/page-view-tracker";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -49,6 +51,8 @@ function SidebarItem({ page, currentSlug, depth = 0 }: { page: any, currentSlug:
 
 export default async function PublicPage({ params }: { params: Promise<{ appSlug: string, slug?: string[] }> }) {
   const { appSlug, slug = [] } = await params;
+
+  const settingsData = await getSettings();
 
   const app = await db.query.apps.findFirst({
     where: eq(apps.slug, appSlug),
@@ -151,23 +155,27 @@ export default async function PublicPage({ params }: { params: Promise<{ appSlug
       return (
         <div className="flex min-h-screen flex-col">
             <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur">
-                <div className="container flex h-14 items-center">
-                    <div className="mr-4 flex items-center gap-4">
-                        <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors" title="Back to Home">
-                            <Home className="h-5 w-5" />
+                <div className="container flex h-14 items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <Link href="/" className="flex items-center gap-2">
+                            {settingsData.brandLogo ? (
+                                <img src={settingsData.brandLogo} alt={settingsData.brandName} className="h-6 w-6" />
+                            ) : (
+                                <Home className="h-5 w-5" />
+                            )}
+                            <span className="font-bold">{settingsData.brandName}</span>
                         </Link>
+                        <div className="h-6 w-px bg-border" />
                         <Link href={`/${appSlug}`} className="flex items-center space-x-2">
                             {app.logoUrl ? (
-                                <img src={app.logoUrl} alt={app.name} className="h-6 w-6" />
+                                <img src={app.logoUrl} alt={app.name} className="h-5 w-5" />
                             ) : (
-                                <BookOpen className="h-6 w-6" />
+                                <BookOpen className="h-5 w-5" />
                             )}
-                            <span className="hidden font-bold sm:inline-block">{app.name}</span>
+                            <span className="font-medium text-muted-foreground">{app.name}</span>
                         </Link>
                     </div>
-                    <div className="ml-auto">
-                        <ThemeToggle />
-                    </div>
+                    <ThemeToggle />
                 </div>
             </header>
             <main className="container py-6">
@@ -180,25 +188,30 @@ export default async function PublicPage({ params }: { params: Promise<{ appSlug
 
   return (
     <div className="flex min-h-screen flex-col">
+      <PageViewTracker pageId={currentPage.id} />
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center">
-            <div className="mr-4 flex items-center gap-4">
-                <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors" title="Back to Home">
-                    <Home className="h-5 w-5" />
+        <div className="container flex h-14 items-center justify-between">
+            <div className="flex items-center gap-4">
+                <Link href="/" className="flex items-center gap-2">
+                    {settingsData.brandLogo ? (
+                        <img src={settingsData.brandLogo} alt={settingsData.brandName} className="h-6 w-6" />
+                    ) : (
+                        <Home className="h-5 w-5" />
+                    )}
+                    <span className="font-bold">{settingsData.brandName}</span>
                 </Link>
+                <div className="h-6 w-px bg-border" />
                 <Link href={`/${appSlug}`} className="flex items-center space-x-2">
                     {app.logoUrl ? (
-                        <img src={app.logoUrl} alt={app.name} className="h-6 w-6" />
+                        <img src={app.logoUrl} alt={app.name} className="h-5 w-5" />
                     ) : (
-                        <BookOpen className="h-6 w-6" />
+                        <BookOpen className="h-5 w-5" />
                     )}
-                    <span className="hidden font-bold sm:inline-block">{app.name}</span>
+                    <span className="font-medium text-muted-foreground">{app.name}</span>
                 </Link>
-                <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
-                    <span className="text-muted-foreground">v{version.name}</span>
-                </nav>
+                <span className="hidden md:inline text-sm text-muted-foreground">v{version.name}</span>
             </div>
-            <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
+            <div className="flex items-center gap-2">
                 <div className="w-full flex-1 md:w-auto md:flex-none">
                     <SearchButton
                         appId={app.id}

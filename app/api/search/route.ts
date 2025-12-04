@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@docuverse/database";
-import { pages } from "@docuverse/database";
+import { db } from "@/lib/db";
+import { pages } from "@/lib/schema";
 import { eq, and, or, like } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {

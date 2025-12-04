@@ -1,11 +1,19 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import { Button } from "@docuverse/ui/button";
-import { Input } from "@docuverse/ui/input";
-import { Label } from "@docuverse/ui/label";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { verifyPassword, getUser } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { users } from "@/lib/schema";
 
 export default async function AdminLoginPage() {
+  // Check if setup is needed
+  const existingUsers = await db.select().from(users);
+  if (existingUsers.length === 0) {
+    redirect("/setup");
+  }
+
   async function login(formData: FormData) {
     "use server";
     
