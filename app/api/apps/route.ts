@@ -75,8 +75,7 @@ export async function GET() {
 
 export async function DELETE(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
+    const { id } = await req.json();
 
     console.log("[API DELETE APP] Received request for ID:", id);
 
@@ -98,6 +97,38 @@ export async function DELETE(req: NextRequest) {
     console.error("[API DELETE APP] Error:", error);
     return NextResponse.json(
       { error: "Failed to delete app" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(req: NextRequest) {
+  try {
+    const { id, name, slug, description, logoUrl } = await req.json();
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "App ID is required" },
+        { status: 400 }
+      );
+    }
+
+    await db
+      .update(apps)
+      .set({
+        name,
+        slug,
+        description,
+        logoUrl,
+        updatedAt: new Date(),
+      })
+      .where(eq(apps.id, id));
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("[API UPDATE APP] Error:", error);
+    return NextResponse.json(
+      { error: "Failed to update app" },
       { status: 500 }
     );
   }

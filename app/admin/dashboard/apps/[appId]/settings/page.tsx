@@ -5,6 +5,9 @@ import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { validateSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import AppSettingsClient from "./settings-client";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -14,6 +17,11 @@ export default async function AppSettingsPage({
 }: { 
   params: Promise<{ appId: string }>;
 }) {
+  const session = await validateSession();
+  if (!session) {
+    redirect("/admin");
+  }
+
   const { appId } = await params;
   
   const app = await db.query.apps.findFirst({
@@ -38,35 +46,7 @@ export default async function AppSettingsPage({
         </div>
       </div>
 
-      <div className="grid gap-6">
-        <div className="border rounded-lg p-6">
-          <h3 className="font-semibold mb-4">General Settings</h3>
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">App Name</label>
-              <p className="text-sm text-muted-foreground mt-1">{app.name}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium">Slug</label>
-              <p className="text-sm text-muted-foreground mt-1">/{app.slug}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium">Description</label>
-              <p className="text-sm text-muted-foreground mt-1">{app.description || "No description"}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="border rounded-lg p-6">
-          <h3 className="font-semibold mb-4">Danger Zone</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            Settings that can permanently affect your application.
-          </p>
-          <Button variant="destructive" disabled>
-            Delete Application
-          </Button>
-        </div>
-      </div>
+      <AppSettingsClient app={app} userRole={session.user.role} />
     </div>
   );
 }
