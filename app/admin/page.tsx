@@ -7,8 +7,15 @@ import { verifyPassword, getUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { users } from "@/lib/schema";
 import { getSettings } from "@/lib/settings";
+import { AlertCircle } from "lucide-react";
 
-export default async function AdminLoginPage() {
+export default async function AdminLoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
+
   // Check if setup is needed first
   const existingUsers = await db.select().from(users);
   if (existingUsers.length === 0) {
@@ -72,6 +79,12 @@ export default async function AdminLoginPage() {
         </p>
       </div>
       <form action={login} className="space-y-4">
+        {error === "invalid" && (
+          <div className="flex items-center gap-2 p-3 text-sm text-red-800 bg-red-50 dark:bg-red-950/30 dark:text-red-200 border border-red-200 dark:border-red-900 rounded-lg">
+            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            <p>Email atau password salah. Silakan coba lagi.</p>
+          </div>
+        )}
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input id="email" name="email" type="email" placeholder="m@example.com" required />

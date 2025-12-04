@@ -57,13 +57,13 @@ async function getPageViewsStats() {
     const thirtyDaysAgo = Math.floor(Date.now() / 1000) - (30 * 24 * 60 * 60);
     const dailyViewsData = await db
       .select({
-        date: sql<string>`DATE(viewed_at, 'unixepoch')`,
+        date: sql<string>`strftime('%Y-%m-%d', viewed_at, 'unixepoch')`,
         count: sql<number>`count(*)`
       })
       .from(pageViews)
       .where(sql`viewed_at >= ${thirtyDaysAgo}`)
-      .groupBy(sql`DATE(viewed_at, 'unixepoch')`)
-      .orderBy(sql`DATE(viewed_at, 'unixepoch')`);
+      .groupBy(sql`strftime('%Y-%m-%d', viewed_at, 'unixepoch')`)
+      .orderBy(sql`strftime('%Y-%m-%d', viewed_at, 'unixepoch')`);
 
     // Single query untuk data 12 bulan terakhir - group by month
     const twelveMonthsAgo = Math.floor(Date.now() / 1000) - (365 * 24 * 60 * 60);
