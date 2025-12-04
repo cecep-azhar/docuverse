@@ -17,8 +17,8 @@ export default async function AppSettingsPage({
 }: { 
   params: Promise<{ appId: string }>;
 }) {
-  const session = await validateSession();
-  if (!session) {
+  const user = await validateSession();
+  if (!user) {
     redirect("/admin");
   }
 
@@ -46,7 +46,7 @@ export default async function AppSettingsPage({
         </div>
       </div>
 
-      <AppSettingsClient app={app} userRole={session.user.role} />
+      <AppSettingsClient app={app} userRole={user.role} />
     </div>
   );
 }
