@@ -14,6 +14,7 @@ console.log("Initializing fresh database...");
 
 async function init() {
   // Drop all tables
+  await client.execute(`DROP TABLE IF EXISTS page_views;`);
   await client.execute(`DROP TABLE IF EXISTS pages;`);
   await client.execute(`DROP TABLE IF EXISTS languages;`);
   await client.execute(`DROP TABLE IF EXISTS versions;`);
@@ -87,8 +88,10 @@ async function init() {
     CREATE TABLE users (
       id TEXT PRIMARY KEY,
       email TEXT NOT NULL UNIQUE,
+      name TEXT,
       password_hash TEXT NOT NULL,
-      role TEXT NOT NULL DEFAULT 'admin'
+      role TEXT NOT NULL DEFAULT 'admin',
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
   `);
 
@@ -101,6 +104,16 @@ async function init() {
       brand_description TEXT,
       primary_color TEXT DEFAULT '#000000',
       updated_at INTEGER NOT NULL
+    );
+  `);
+
+  // Create page_views table
+  await client.execute(`
+    CREATE TABLE page_views (
+      id TEXT PRIMARY KEY,
+      page_id TEXT NOT NULL,
+      viewed_at INTEGER NOT NULL,
+      FOREIGN KEY (page_id) REFERENCES pages(id) ON DELETE CASCADE
     );
   `);
 

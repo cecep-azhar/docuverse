@@ -48,53 +48,74 @@ async function getStats() {
 }
 
 async function getPageViewsStats() {
-  const totalViewsRes = await db.select({ count: sql<number>`count(*)` }).from(pageViews);
-  const totalViews = Number(totalViewsRes[0]?.count || 0);
+  try {
+    const totalViewsRes = await db.select({ count: sql<number>`count(*)` }).from(pageViews);
+    const totalViews = Number(totalViewsRes[0]?.count || 0);
 
-  // Statistik harian (30 hari terakhir)
-  const now = new Date();
-  const days: string[] = [];
-  const viewsPerDay: number[] = [];
-  for (let i = 29; i >= 0; i--) {
-    const d = new Date(now);
-    d.setDate(d.getDate() - i);
-    d.setHours(0, 0, 0, 0);
-    const label = d.toLocaleString('default', { month: 'short', day: 'numeric' });
-    days.push(label);
-    
-    const startOfDay = Math.floor(d.getTime() / 1000);
-    const endOfDay = Math.floor((d.getTime() + 24 * 60 * 60 * 1000) / 1000);
-    
-    const res = await db.select({ count: sql<number>`count(*)` })
-      .from(pageViews)
-      .where(sql`viewed_at >= ${startOfDay} AND viewed_at < ${endOfDay}`);
-    viewsPerDay.push(Number(res[0]?.count || 0));
+    // Statistik harian (30 hari terakhir)
+    const now = new Date();
+    const days: string[] = [];
+    const viewsPerDay: number[] = [];
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      d.setHours(0, 0, 0, 0);
+      const label = d.toLocaleString('default', { month: 'short', day: 'numeric' });
+      days.push(label);
+      
+      const startOfDay = Math.floor(d.getTime() / 1000);
+      const endOfDay = Math.floor((d.getTime() + 24 * 60 * 60 * 1000) / 1000);
+      
+      const res = await db.select({ count: sql<number>`count(*)` })
+        .from(pageViews)
+        .where(sql`viewed_at >= ${startOfDay} AND viewed_at < ${endOfDay}`);
+      viewsPerDay.push(Number(res[0]?.count || 0));
+    }
+
+    // Statistik bulanan (12 bulan terakhir)
+    const months: string[] = [];
+    const viewsPerMonth: number[] = [];
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const label = d.toLocaleString('default', { month: 'short', year: '2-digit' });
+      months.push(label);
+      
+      const startOfMonth = Math.floor(new Date(d.getFullYear(), d.getMonth(), 1).getTime() / 1000);
+      const endOfMonth = Math.floor(new Date(d.getFullYear(), d.getMonth() + 1, 1).getTime() / 1000);
+      
+      const res = await db.select({ count: sql<number>`count(*)` })
+        .from(pageViews)
+        .where(sql`viewed_at >= ${startOfMonth} AND viewed_at < ${endOfMonth}`);
+      viewsPerMonth.push(Number(res[0]?.count || 0));
+    }
+
+    return { 
+      totalViews, 
+      dailyLabels: days, 
+      dailyData: viewsPerDay,
+      monthlyLabels: months,
+      monthlyData: viewsPerMonth
+    };
+  } catch (error) {
+    console.error("Error fetching page views stats:", error);
+    // Return default empty stats if table doesn't exist
+    const emptyDays = Array(30).fill(0).map((_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (29 - i));
+      return d.toLocaleString('default', { month: 'short', day: 'numeric' });
+    });
+    const emptyMonths = Array(12).fill(0).map((_, i) => {
+      const d = new Date(new Date().getFullYear(), new Date().getMonth() - (11 - i), 1);
+      return d.toLocaleString('default', { month: 'short', year: '2-digit' });
+    });
+    return {
+      totalViews: 0,
+      dailyLabels: emptyDays,
+      dailyData: Array(30).fill(0),
+      monthlyLabels: emptyMonths,
+      monthlyData: Array(12).fill(0),
+    };
   }
-
-  // Statistik bulanan (12 bulan terakhir)
-  const months: string[] = [];
-  const viewsPerMonth: number[] = [];
-  for (let i = 11; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const label = d.toLocaleString('default', { month: 'short', year: '2-digit' });
-    months.push(label);
-    
-    const startOfMonth = Math.floor(new Date(d.getFullYear(), d.getMonth(), 1).getTime() / 1000);
-    const endOfMonth = Math.floor(new Date(d.getFullYear(), d.getMonth() + 1, 1).getTime() / 1000);
-    
-    const res = await db.select({ count: sql<number>`count(*)` })
-      .from(pageViews)
-      .where(sql`viewed_at >= ${startOfMonth} AND viewed_at < ${endOfMonth}`);
-    viewsPerMonth.push(Number(res[0]?.count || 0));
-  }
-
-  return { 
-    totalViews, 
-    dailyLabels: days, 
-    dailyData: viewsPerDay,
-    monthlyLabels: months,
-    monthlyData: viewsPerMonth
-  };
 }
 
 export default async function DashboardPage() {
