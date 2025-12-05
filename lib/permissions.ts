@@ -55,7 +55,7 @@ export function canView(userRole: UserRole): boolean {
 }
 
 export function canManageUsers(userRole: UserRole): boolean {
-  return userRole === 'super_admin';
+  return true; // Both admin and super_admin can manage users
 }
 
 export function canManageSettings(userRole: UserRole): boolean {
