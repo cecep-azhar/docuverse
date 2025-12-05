@@ -11,6 +11,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { SearchButton } from "@/components/search-button";
 import { getSettings } from "@/lib/settings";
 import PageViewTracker from "@/components/page-view-tracker";
+import { MobileSidebar } from "@/components/mobile-sidebar";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -192,6 +193,13 @@ export default async function PublicPage({ params }: { params: Promise<{ appSlug
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 items-center justify-between">
             <div className="flex items-center gap-4">
+                <MobileSidebar>
+                  <div className="space-y-4">
+                    {rootPages.map(page => (
+                      <SidebarItem key={page.id} page={page} currentSlug={currentPage.slug} />
+                    ))}
+                  </div>
+                </MobileSidebar>
                 <Link href="/" className="flex items-center gap-2">
                     {settingsData.brandLogo ? (
                         <img src={settingsData.brandLogo} alt={settingsData.brandName} className="h-6 w-6" />
@@ -199,15 +207,6 @@ export default async function PublicPage({ params }: { params: Promise<{ appSlug
                         <Home className="h-5 w-5" />
                     )}
                     <span className="font-bold">{settingsData.brandName}</span>
-                </Link>
-                <div className="h-6 w-px bg-border" />
-                <Link href={`/${appSlug}`} className="flex items-center space-x-2">
-                    {app.logoUrl ? (
-                        <img src={app.logoUrl} alt={app.name} className="h-5 w-5" />
-                    ) : (
-                        <BookOpen className="h-5 w-5" />
-                    )}
-                    <span className="font-medium text-muted-foreground">{app.name}</span>
                 </Link>
                 <span className="hidden md:inline text-sm text-muted-foreground">v{version.name}</span>
             </div>
@@ -227,7 +226,7 @@ export default async function PublicPage({ params }: { params: Promise<{ appSlug
       
       <div className="container flex-1 items-start md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10">
         <aside className="fixed top-14 z-30 -ml-2 hidden h-[calc(100vh-3.5rem)] w-full shrink-0 md:sticky md:block">
-            <div className="h-full py-6 pl-8 pr-6 lg:py-8">
+            <div className="h-full overflow-y-auto py-6 pl-8 pr-6 lg:py-8 pb-20">
                 <div className="w-full space-y-4">
                     {rootPages.map(page => (
                         <SidebarItem key={page.id} page={page} currentSlug={currentPage.slug} />
@@ -243,6 +242,21 @@ export default async function PublicPage({ params }: { params: Promise<{ appSlug
                     </div>
                     <ChevronRight className="h-4 w-4" />
                     <div className="font-medium text-foreground">{currentPage.title}</div>
+                </div>
+                <div className="mb-6 flex items-center gap-3 pb-4 border-b">
+                    <Link href={`/${appSlug}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                        {app.logoUrl ? (
+                            <img src={app.logoUrl} alt={app.name} className="h-10 w-10 rounded" />
+                        ) : (
+                            <div className="h-10 w-10 rounded bg-primary/10 flex items-center justify-center">
+                                <BookOpen className="h-6 w-6 text-primary" />
+                            </div>
+                        )}
+                        <div>
+                            <h2 className="text-xl font-bold">{app.name}</h2>
+                            <p className="text-sm text-muted-foreground">v{version.name}</p>
+                        </div>
+                    </Link>
                 </div>
                 <div className="space-y-2">
                     <h1 className="scroll-m-20 text-4xl font-bold tracking-tight">{currentPage.title}</h1>
