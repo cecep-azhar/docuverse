@@ -53,35 +53,33 @@ async function getPageViewsStats() {
     const totalViewsRes = await db.select({ count: sql<number>`count(*)` }).from(pageViews);
     const totalViews = Number(totalViewsRes[0]?.count || 0);
 
-    // Single query untuk data 30 hari terakhir - group by date
-    const thirtyDaysAgo = Math.floor(Date.now() / 1000) - (30 * 24 * 60 * 60);
-    const dailyViewsData = await db
+    // Query untuk data 30 hari terakhir - timestamp is in seconds already
+    const allDailyViews = await db
       .select({
-        date: sql<string>`strftime('%Y-%m-%d', viewed_at, 'unixepoch')`,
+        date: sql<string>`date(viewed_at, 'unixepoch')`,
         count: sql<number>`count(*)`
       })
       .from(pageViews)
-      .where(sql`viewed_at >= ${thirtyDaysAgo}`)
-      .groupBy(sql`strftime('%Y-%m-%d', viewed_at, 'unixepoch')`)
-      .orderBy(sql`strftime('%Y-%m-%d', viewed_at, 'unixepoch')`);
+      .groupBy(sql`date(viewed_at, 'unixepoch')`)
+      .orderBy(sql`date(viewed_at, 'unixepoch') DESC`)
+      .limit(30);
 
-    // Single query untuk data 12 bulan terakhir - group by month
-    const twelveMonthsAgo = Math.floor(Date.now() / 1000) - (365 * 24 * 60 * 60);
-    const monthlyViewsData = await db
+    // Query untuk data 12 bulan terakhir - timestamp is in seconds already
+    const allMonthlyViews = await db
       .select({
         month: sql<string>`strftime('%Y-%m', viewed_at, 'unixepoch')`,
         count: sql<number>`count(*)`
       })
       .from(pageViews)
-      .where(sql`viewed_at >= ${twelveMonthsAgo}`)
       .groupBy(sql`strftime('%Y-%m', viewed_at, 'unixepoch')`)
-      .orderBy(sql`strftime('%Y-%m', viewed_at, 'unixepoch')`);
+      .orderBy(sql`strftime('%Y-%m', viewed_at, 'unixepoch') DESC`)
+      .limit(12);
 
     // Map hasil query ke array dengan semua tanggal (isi 0 jika tidak ada data)
     const now = new Date();
     const days: string[] = [];
     const viewsPerDay: number[] = [];
-    const dailyMap = new Map(dailyViewsData.map(d => [d.date, Number(d.count)]));
+    const dailyMap = new Map(allDailyViews.map(d => [d.date, Number(d.count)]));
     
     for (let i = 29; i >= 0; i--) {
       const d = new Date(now);
@@ -96,11 +94,13 @@ async function getPageViewsStats() {
     // Map hasil query bulanan
     const months: string[] = [];
     const viewsPerMonth: number[] = [];
-    const monthlyMap = new Map(monthlyViewsData.map(d => [d.month, Number(d.count)]));
+    const monthlyMap = new Map(allMonthlyViews.map(d => [d.month, Number(d.count)]));
     
     for (let i = 11; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const monthStr = d.toISOString().slice(0, 7); // YYYY-MM
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0'); // +1 because getMonth() is 0-indexed
+      const monthStr = `${year}-${month}`; // YYYY-MM format
       const label = d.toLocaleString('default', { month: 'short', year: '2-digit' });
       months.push(label);
       viewsPerMonth.push(monthlyMap.get(monthStr) || 0);
