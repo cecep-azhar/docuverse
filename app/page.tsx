@@ -40,6 +40,7 @@ export default async function HomePage() {
 
       <div className="relative z-10">
         <header className="sticky top-0 z-20">
+          <script defer src="https://analytics.xpc.my.id/script.js" data-website-id="b98edc55-ab0c-44b2-963e-928e81e43e56"></script>
           <div className="container flex h-16 items-center justify-end">
             <nav className="flex items-center gap-2">
               <ThemeToggle />

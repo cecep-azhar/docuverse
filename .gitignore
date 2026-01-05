@@ -5,3 +5,4 @@ node_modules
 local.db
 local.db-journal
 /.turbo
+pnpm-lock.yaml
